@@ -1,0 +1,251 @@
+#*
+ * This software is licensed under the Apache 2 license, quoted below.
+ *
+ * Copyright 2010 Julien Eluard
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ *     [http://www.apache.org/licenses/LICENSE-2.0]
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *#
+
+Checking a project's version against older releases 
+
+* Basic example
+
+  In order to check your project's version against an older release, you must add the enforcer rule as a dependency to
+  the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                  ...
+                  <previousVersion>1.0.0</previousVersion>
+                  ...
+                </checkVersionRule>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  Once you have configured your project with details of the previous version to check, maven-enforcer will be able to
+  throw a build error if current version is not backward compatible with previous one.  
+
+* Including classes 
+
+  By default all classes will be considered during checking process. You might want to only check a subset of classes/packages. This is achieved by specifying <<<includes>>>.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                  ...
+                  <previousVersion>1.0.0</previousVersion>
+                  <includes>
+                    <include>org.project.MyClass</include>
+                  </includes>
+                  ...
+                </checkVersionRule>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  We can specify multiple <includes> classes or packages. For example, to include <<<org.project.MyClass>>> class and <<<org.project.internal>>> package you would use a configuration like:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                  ...
+                  <previousVersion>1.0.0</previousVersion>
+                  <includes>
+                    <include>org.project.MyClass</include>
+                    <include>org.project.internal</include>
+                  </includes>
+                  ...
+                </checkVersionRule>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+* Excluding classes 
+
+  You may also want to exclude some classes/packages. For instance internal code might evolve independently from published API. This is achieved by specifying <<<excludes>>>.
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                  ...
+                  <previousVersion>1.0.0</previousVersion>
+                  <excludes>
+                    <exclude>org.project.MyClass</exclude>
+                  </excludes>
+                  ...
+                </checkVersionRule>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---

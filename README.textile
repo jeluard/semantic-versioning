@@ -1,0 +1,1 @@
+Semantic Versioning is a Java library allowing to automatically validate if your project's version number follows Semantic Versioning principles.
