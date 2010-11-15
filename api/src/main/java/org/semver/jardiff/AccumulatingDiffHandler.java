@@ -27,16 +27,15 @@ import org.osjava.jardiff.AbstractDiffHandler;
 import org.osjava.jardiff.AbstractInfo;
 import org.osjava.jardiff.ClassInfo;
 import org.osjava.jardiff.DiffException;
-import org.osjava.jardiff.DiffHandler;
 import org.osjava.jardiff.FieldInfo;
 import org.osjava.jardiff.MethodInfo;
 
 /**
  *
- * {@link DiffHandler} implementation accumulating changes.
+ * {@link org.osjava.jardiff.DiffHandler} implementation accumulating changes.
  *
  */
-public class AccumulatingDiffHandler extends AbstractDiffHandler {
+public final class AccumulatingDiffHandler extends AbstractDiffHandler {
 
     public static class Difference implements Comparable<Difference> {
         
@@ -261,7 +260,7 @@ public class AccumulatingDiffHandler extends AbstractDiffHandler {
      *
      * @return
      */
-    protected final boolean isConsidered() {
+    private boolean isConsidered() {
         for (final String exclude : this.excludes) {
             if (this.currentClassName.startsWith(exclude)) {
                 return false;

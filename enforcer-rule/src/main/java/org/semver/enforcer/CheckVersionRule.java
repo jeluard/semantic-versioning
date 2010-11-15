@@ -42,30 +42,30 @@ import org.semver.Version;
  * Fails if {@link Version} semantic is not respected.
  * 
  */
-public class CheckVersionRule implements EnforcerRule {
+public final class CheckVersionRule implements EnforcerRule {
 
     /**
      * Version number of artifact to be checked.
      *
      * @parameter
      */
-    protected String previousVersion;        
+    private String previousVersion;        
     
     /**
      * Class names to be included.
      *
      * @parameter
      */
-    protected String[] includes;    
+    private String[] includes;    
     
     /**
      * Class names to be excluded.
      *
      * @parameter
      */
-    protected String[] excludes;
+    private String[] excludes;
     
-    protected final Set<String> extractFilters(final String[] filtersAsStringArray) {
+    private Set<String> extractFilters(final String[] filtersAsStringArray) {
         if (filtersAsStringArray == null) {
             return Collections.emptySet();
         }
@@ -104,7 +104,7 @@ public class CheckVersionRule implements EnforcerRule {
      * Validates that specified {@link Artifact} is a JAR file.
      * @param artifact
      */
-    protected final void validateArtifact(final Artifact artifact) {
+    private void validateArtifact(final Artifact artifact) {
         if (!artifact.getFile().isFile()) {
             throw new IllegalArgumentException("<"+artifact.getFile()+"> is not a file");
         }

@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
  * Version following semantic defined by <a href="http://semver.org/">Semantic Versioning</a> document.
  * 
  */
-public class Version implements Comparable<Version> {
+public final class Version implements Comparable<Version> {
     
     /**
      * {@link Version} element type. From most meaningful to less meaningful.
@@ -43,8 +43,8 @@ public class Version implements Comparable<Version> {
 
     }
 
-    private final static String FORMAT = "(\\d)\\.(\\d)\\.(\\d)([A-Za-z][0-9A-Za-z-]*)?";
-    private final static Pattern PATTERN = Pattern.compile(Version.FORMAT);
+    private static final String FORMAT = "(\\d)\\.(\\d)\\.(\\d)([A-Za-z][0-9A-Za-z-]*)?";
+    private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
     private final int major;
     private final int minor;
@@ -101,7 +101,7 @@ public class Version implements Comparable<Version> {
      * @param type
      * @return int representation of provided number
      */
-    private static @Nonnegative int parseElement(@Nonnull final String number, @Nonnull final Version.Type type) {
+    private @Nonnegative static int parseElement(@Nonnull final String number, @Nonnull final Version.Type type) {
         try {
             return Integer.valueOf(number);
         } catch (NumberFormatException e) {

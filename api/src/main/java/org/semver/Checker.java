@@ -19,7 +19,6 @@
 package org.semver;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,9 +101,8 @@ public class Checker {
      * @param excludes
      * @return all {@link Difference} between both JARs
      * @throws IOException
-     * @throws FileNotFoundException
      */
-    public final Set<AccumulatingDiffHandler.Difference> diff(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException, FileNotFoundException {
+    public final Set<AccumulatingDiffHandler.Difference> diff(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException {
         if (!previousJAR.isFile()) {
             throw new IllegalArgumentException("<"+previousJAR+"> is not a valid file");
         }
@@ -209,9 +207,8 @@ public class Checker {
      * @param includes
      * @param excludes
      * @throws IOException
-     * @throws FileNotFoundException
      */
-    public final void dumpDiff(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException, FileNotFoundException {
+    public final void dumpDiff(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException {
         final Set<AccumulatingDiffHandler.Difference> differences = diff(previousJAR, currentJAR, includes, excludes);
         final List<AccumulatingDiffHandler.Difference> sortedDifferences = new LinkedList<AccumulatingDiffHandler.Difference>(differences);
         Collections.sort(sortedDifferences);
@@ -249,7 +246,7 @@ public class Checker {
         }
     }
     
-    public final CompatibilityType check(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException, FileNotFoundException {
+    public final CompatibilityType check(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) throws IOException {
         return computeCompatibilityType(diff(previousJAR, currentJAR, includes, excludes));
     }
 
@@ -303,7 +300,7 @@ public class Checker {
         }
     }
     
-    public static void main(final String[] arguments) throws Exception {
+    public static void main(final String[] arguments) throws IOException {
         Checker.failIfNotEnoughArguments(arguments, 3, "Usage: ["+DIFF_ACTION+"|"+CHECK_ACTION+"|"+INFER_ACTION+"|"+VALIDATE_ACTION+"] (previousVersion) previousJar (currentVersion) currentJar (includes) (excludes)");
 
         final String action = arguments[0];
