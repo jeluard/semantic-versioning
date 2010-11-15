@@ -15,10 +15,8 @@
 -docencoding
 'UTF-8'
 -doctitle
-'semantic-versioning 0.9-SNAPSHOT Test API'
--link
-'../apidocs'
+'Semantic Versioning Parent 0.9-SNAPSHOT Test API'
 -use
 -version
 -windowtitle
-'semantic-versioning 0.9-SNAPSHOT Test API'
+'Semantic Versioning Parent 0.9-SNAPSHOT Test API'
