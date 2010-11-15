@@ -19,15 +19,16 @@
 package org.semver.enforcer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-
 import org.apache.maven.enforcer.rule.api.EnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
@@ -74,30 +75,38 @@ public final class CheckVersionRule implements EnforcerRule {
     
     @Override
     public void execute(final EnforcerRuleHelper helper) throws EnforcerRuleException {
+        final Artifact previousArtifact;
+        final Artifact currentArtifact;
         try {
             final MavenProject project = (MavenProject) helper.evaluate("${project}");
             final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
-            final Artifact previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), this.previousVersion, null, "jar");
+            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), this.previousVersion, null, "jar");
             final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             final ArtifactRepository localRepository = (ArtifactRepository) helper.evaluate("${localRepository}");
             resolver.resolve(previousArtifact, project.getRemoteArtifactRepositories(), localRepository);
-            final Artifact currentArtifact = project.getArtifact();
+            currentArtifact = project.getArtifact();
             
             validateArtifact(previousArtifact);
             validateArtifact(currentArtifact);
-            
-            final Version previous = Version.parse(previousArtifact.getVersion());
-            final File previousJar = previousArtifact.getFile();
-            final Version current = Version.parse(currentArtifact.getVersion());
-            final File currentJar = currentArtifact.getFile();
-            final Checker.CompatibilityType compatibilityType = new Checker().check(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
-            final boolean compatible = Checker.isTypeCompatible(compatibilityType, previous.delta(current));
-            if (!compatible) {
-                throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+Checker.inferNextVersion(previous, compatibilityType)+">.");
-            }
         } catch (Exception e) {
-            throw new EnforcerRuleException("Exception while executing rule", e);
+            throw new EnforcerRuleException("Exception while accessing artifacts: "+e.toString(), e);
+        }     
+            
+        final Version previous = Version.parse(previousArtifact.getVersion());
+        final File previousJar = previousArtifact.getFile();
+        final Version current = Version.parse(currentArtifact.getVersion());
+        final File currentJar = currentArtifact.getFile();
+        final Checker.CompatibilityType compatibilityType;
+        try {
+            compatibilityType = new Checker().check(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+        } catch (IOException e) {
+            throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);
         }
+        final boolean compatible = Checker.isTypeCompatible(compatibilityType, previous.delta(current));
+        if (!compatible) {
+            throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+Checker.inferNextVersion(previous, compatibilityType)+">.");
+        }
+
     }
 
     /**
