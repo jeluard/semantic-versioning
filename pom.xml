@@ -3,18 +3,25 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.semantic-versioning</groupId>
-    <artifactId>semantic-versioning</artifactId>
+    <groupId>org.semver</groupId>
+    <artifactId>parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>semantic-versioning</name>
+    <name>Semantic Versioning Parent</name>
     <inceptionYear>2010</inceptionYear>
     <url>http://github.com/jeluard/semantic-versioning</url>
     
     <description>
         A library to automatically validate if your project's version number follows Semantic Versioning principles
     </description>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>5</version>
+    </parent>
+
 
     <licenses>
         <license>

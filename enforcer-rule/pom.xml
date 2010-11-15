@@ -9,8 +9,8 @@
   <name>Enforcer Rule</name>
 
   <parent>
-    <groupId>org.semantic-versioning</groupId>
-    <artifactId>semantic-versioning</artifactId>
+    <groupId>org.semver</groupId>
+    <artifactId>parent</artifactId>
     <version>0.9-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
