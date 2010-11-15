@@ -103,6 +103,7 @@
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.6</version>
+                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <phase>site-deploy</phase>
