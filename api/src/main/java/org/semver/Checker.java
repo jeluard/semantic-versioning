@@ -82,10 +82,13 @@ public class Checker {
      * @return true if specified {@link CompatibilityType} 
      */
     public static boolean isTypeCompatible(final CompatibilityType compatibilityType, final Version.Type type) {
+        System.out.println("==="+compatibilityType);
         switch (compatibilityType) {
-            case BACKWARD_COMPATIBLE_USER:
-                return type.isAtLeast(Version.Type.PATCH);
             case BACKWARD_COMPATIBLE_IMPLEMENTER:
+                System.out.println("BACKWARD_COMPATIBLE_IMPLEMENTER!!");
+                System.out.println(type.isAtLeast(Version.Type.PATCH));
+                return type.isAtLeast(Version.Type.PATCH);
+            case BACKWARD_COMPATIBLE_USER:
                 return type.isAtLeast(Version.Type.MINOR);
             case NON_BACKWARD_COMPATIBLE:
                 return type.isAtLeast(Version.Type.MAJOR);

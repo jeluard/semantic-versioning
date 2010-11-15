@@ -58,11 +58,11 @@ Usage
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionnRule">
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
                   ...
                   <previousVersion>1.0.0</previousVersion>
                   ...
-                </checkVersionrule>
+                </checkVersionRule>
               </rules>
             </configuration>
           </execution>
