@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.semantic-versioning</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>semantic-versioning</artifactId>
     <version>0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -34,8 +34,10 @@
         <system>Github</system>
         <url>http://github.com/jeluard/semantic-versioning/issues</url>
     </issueManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gh-pages-dir>${project.basedir}/../${project.artifactId}-gh-pages</gh-pages-dir>
     </properties>
 
     <modules>
@@ -98,6 +100,38 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>2.1.1</version>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <phase>site-deploy</phase>
+                        <id>deploy-gh-pages</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <target>
+                        <tstamp>
+                            <format property="now" pattern="yyyy-MM-dd hh:mm"/>
+                        </tstamp>
+                        <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
+                            <arg line="pull origin gh-pages"/>
+                        </exec>
+                        <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
+                            <arg line="add ."/>
+                        </exec>
+                        <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
+                            <arg line="commit -a -m 'update gh-pages ${project.version} ${now}'"/>
+                        </exec>
+                        <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
+                            <arg line="push origin gh-pages"/>
+                        </exec>
+                    </target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     
@@ -125,5 +159,12 @@
         </plugins>
     </reporting>
 
+    <distributionManagement>
+        <site>
+            <id>gh-pages</id>
+            <url>file://${gh-pages-dir}</url>
+        </site>
+    </distributionManagement>
+    
 </project>
 
