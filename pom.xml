@@ -37,7 +37,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gh-pages-dir>${project.basedir}/../${project.artifactId}-gh-pages</gh-pages-dir>
+        <gh-pages-dir>${project.basedir}/../semantic-versioning-gh-pages</gh-pages-dir>
     </properties>
 
     <modules>
@@ -103,7 +103,6 @@
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.6</version>
-                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <phase>site-deploy</phase>
