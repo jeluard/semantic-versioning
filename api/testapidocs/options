@@ -16,8 +16,6 @@
 'UTF-8'
 -doctitle
 'API 0.9-SNAPSHOT Test API'
--link
-'../apidocs'
 -use
 -version
 -windowtitle
