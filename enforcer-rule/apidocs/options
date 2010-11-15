@@ -16,6 +16,8 @@
 'UTF-8'
 -doctitle
 'Enforcer Rule 0.9-SNAPSHOT API'
+-link
+'http://java.sun.com/javase/6/docs/api'
 -linkoffline
 'http://github.com/jeluard/semantic-versioning/api/apidocs' '/Users/julien/Documents/Projects/semantic-versioning/api/target/site/apidocs'
 -use
