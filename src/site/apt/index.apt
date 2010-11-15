@@ -29,18 +29,18 @@ Semantic Versioning
 
 * CLI overview
 
-  The {{{../api/usage.html}CLI}} offers several options to validate your project's version number from a command line.
+  The {{{./api/usage.html}CLI}} offers several options to validate your project's version number from a command line.
  
   []
 
 * Enforcer Rule overview
 
-  The {{{../enforcer-rule/index.html}Enforcer Rule}} allows to automatize validatiion of your project's version number from a Maven project.
+  The {{{./enforcer-rule/index.html}Enforcer Rule}} allows to automatize validation of your project's version number from a Maven project.
 
   []
 
 * API overview
 
-  Semantic Versioning also provides an {{{../api/index.html}API}} for programmatically validating your project's version number.
+  Semantic Versioning also provides an {{{./api/index.html}API}} for programmatically validating your project's version number.
   
   []

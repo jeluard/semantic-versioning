@@ -32,6 +32,6 @@ Semantic Versioning Enforcer Rule
   To provide you with better understanding of some usages of Semantic Versioning Enforcer Rule,
   you can take a look into the following example:
 
-  * {{{examples/checking-version.html}Checking a project's version against an older release}}
+  * {{{./examples/checking-version.html}Checking a project's version against an older release}}
 
   []

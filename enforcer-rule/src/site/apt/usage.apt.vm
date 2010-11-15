@@ -81,4 +81,4 @@ Usage
   Once you have configured your project with details of the previous version to check, maven-enforcer will be able to
   throw a build error if current version is not backward compatible with previous one. 
 
-  Some more detailed {{{examples/checking-version.html}examples}} of the <<<checkVersionRule>>> rule.
+  Some more detailed {{{./examples/checking-version.html}examples}} of the <<<checkVersionRule>>> rule.
