@@ -15,6 +15,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <gh-pages-dir>${project.basedir}/../../semantic-versioning-gh-pages</gh-pages-dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
