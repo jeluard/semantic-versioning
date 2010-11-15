@@ -24,13 +24,13 @@ Semantic Versioning
 
   The CLI has the following functionality:
   
-  * {{{usage.html}Diff}} between two specifed JARs
+  * {{{./usage.html}Diff}} between two specifed JARs
 
-  * {{{usage.html}Check}} compatibility type between two specifed JARs
+  * {{{./usage.html}Check}} compatibility type between two specifed JARs
 
-  * {{{usage.html}Infer}} correct version of your JAR based on an previous version
+  * {{{./usage.html}Infer}} correct version of your JAR based on an previous version
 
-  * {{{usage.html}Validate}} if your JAR's version is compatible with a previous one
+  * {{{./usage.html}Validate}} if your JAR's version is compatible with a previous one
  
   []
 
@@ -38,6 +38,6 @@ Semantic Versioning
 
   Semantic Versioning also provides an API for programmatically validating your project's version number.  This API is used by 
   {{{../enforcer-rule} the maven enforcer rule}}. If these tool is not sufficient to your needs, then
-  the entry point to the API is {{{apidocs/org/semver/Checker.html}Checker}}.
+  the entry point to the API is {{{./apidocs/org/semver/Checker.html}Checker}}.
   
   []
