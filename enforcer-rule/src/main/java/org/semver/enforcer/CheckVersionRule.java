@@ -67,6 +67,13 @@ public final class CheckVersionRule implements EnforcerRule {
      */
     private String[] excludes;
     
+    /**
+     * Print changes details if current artifact is incompatible.
+     *
+     * @parameter
+     */ 
+    private boolean printDetails = false;
+    
     private Set<String> extractFilters(final String[] filtersAsStringArray) {
         if (filtersAsStringArray == null) {
             return Collections.emptySet();
@@ -100,17 +107,22 @@ public final class CheckVersionRule implements EnforcerRule {
         final File previousJar = previousArtifact.getFile();
         final Version current = Version.parse(currentArtifact.getVersion());
         final File currentJar = currentArtifact.getFile();
-        final Checker.CompatibilityType compatibilityType;
+        helper.getLog().info("Using <"+previousJar+"> as previous JAR");
+        helper.getLog().info("Using <"+currentJar+"> as current JAR");
+
         try {
-            compatibilityType = new Checker().check(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+            final Checker checker = new Checker();
+            final Checker.CompatibilityType compatibilityType = checker.check(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+            final boolean compatible = Checker.isTypeCompatible(compatibilityType, previous.delta(current));
+            if (!compatible) {
+                if (this.printDetails) {
+                    checker.dumpDiff(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+                }
+                throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+Checker.inferNextVersion(previous, compatibilityType)+">.");
+            }
         } catch (IOException e) {
             throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);
         }
-        final boolean compatible = Checker.isTypeCompatible(compatibilityType, previous.delta(current));
-        if (!compatible) {
-            throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+Checker.inferNextVersion(previous, compatibilityType)+">.");
-        }
-
     }
 
     /**
