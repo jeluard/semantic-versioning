@@ -23,7 +23,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.semantic-versioning</groupId>
+            <groupId>org.semver</groupId>
             <artifactId>api</artifactId>
             <version>0.9-SNAPSHOT</version>
         </dependency>
