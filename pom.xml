@@ -30,7 +30,14 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    
+
+    <developers>
+        <developer>
+            <id>julien</id>
+            <name>Julien Eluard</name>
+        </developer>
+    </developers>
+
     <scm>
         <connection>scm:git:git@github.com:jeluard/semantic-versioning</connection>
         <developerConnection>scm:git:git@github.com:jeluard/semantic-versioning</developerConnection>
@@ -174,4 +181,3 @@
     </distributionManagement>
     
 </project>
-
