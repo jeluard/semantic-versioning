@@ -22,6 +22,10 @@
         <version>5</version>
     </parent>
 
+    <modules>
+        <module>api</module>
+        <module>enforcer-rule</module>
+    </modules>
 
     <licenses>
         <license>
@@ -49,15 +53,17 @@
         <url>http://github.com/jeluard/semantic-versioning/issues</url>
     </issueManagement>
 
+    <distributionManagement>
+        <site>
+            <id>gh-pages</id>
+            <url>file://${gh-pages-dir}</url>
+        </site>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gh-pages-dir>${project.basedir}/../semantic-versioning-gh-pages</gh-pages-dir>
     </properties>
-
-    <modules>
-        <module>api</module>
-        <module>enforcer-rule</module>
-    </modules>
 
     <build>
         <plugins>
@@ -146,6 +152,14 @@
                     </target>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
     
@@ -169,15 +183,36 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
-
         </plugins>
     </reporting>
-
-    <distributionManagement>
-        <site>
-            <id>gh-pages</id>
-            <url>file://${gh-pages-dir}</url>
-        </site>
-    </distributionManagement>
+    
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     
 </project>
