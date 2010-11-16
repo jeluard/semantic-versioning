@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.semver</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9</version>
+    <version>0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Semantic Versioning Parent</name>
@@ -129,19 +130,19 @@
                 <configuration>
                     <target>
                         <tstamp>
-                            <format property="now" pattern="yyyy-MM-dd hh:mm" />
+                            <format property="now" pattern="yyyy-MM-dd hh:mm"/>
                         </tstamp>
                         <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
-                            <arg line="pull origin gh-pages" />
+                            <arg line="pull origin gh-pages"/>
                         </exec>
                         <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
-                            <arg line="add ." />
+                            <arg line="add ."/>
                         </exec>
                         <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
-                            <arg line="commit -a -m 'update gh-pages ${project.version} ${now}'" />
+                            <arg line="commit -a -m 'update gh-pages ${project.version} ${now}'"/>
                         </exec>
                         <exec executable="git" dir="${gh-pages-dir}" failonerror="true">
-                            <arg line="push origin gh-pages" />
+                            <arg line="push origin gh-pages"/>
                         </exec>
                     </target>
                 </configuration>
