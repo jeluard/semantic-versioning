@@ -33,6 +33,7 @@ import org.apache.maven.enforcer.rule.api.EnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.StringUtils;
 import org.semver.Checker;
 import org.semver.Version;
 
@@ -75,6 +76,9 @@ public final class CheckVersionRule implements EnforcerRule {
     
     @Override
     public void execute(final EnforcerRuleHelper helper) throws EnforcerRuleException {
+        if (StringUtils.isEmpty(this.previousVersion)) {
+            throw new EnforcerRuleException("previousVersion can't be empty");
+        }
         final Artifact previousArtifact;
         final Artifact currentArtifact;
         try {
