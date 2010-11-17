@@ -25,7 +25,7 @@ Semantic Versioning Enforcer Rule
 
   The Semantic Versioning Enforcer Rule has the following rule.
 
-  * <<<checkRule>>> checks a project version number against an older release.
+  * <<<checkVersionRule>>> checks a project version number against an older release.
 
 * Examples
 

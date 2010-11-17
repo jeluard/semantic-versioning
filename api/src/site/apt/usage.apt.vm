@@ -25,7 +25,7 @@ Diff
     Dumps all changes between two JARs on standard output.
 
 -----------------------------
-% java -jar target/semantic-versioning-${project.version}.jar previousJar currentJar (includes) (excludes)
+% java -jar semantic-versioning-${project.version}.jar previousJar currentJar (includes) (excludes)
 Class org.project.MyClass
  Added Class 
 Class org.project.MyClass2
@@ -40,7 +40,7 @@ Check
     Checks compatibility type between two JARs.
 
 -----------------------------
-% java -jar target/semantic-versioning-${project.version}.jar previousJar currentJar (includes) (excludes)
+% java -jar semantic-versioning-${project.version}.jar previousJar currentJar (includes) (excludes)
 BACKWARD_COMPATIBLE_IMPLEMENTER
 -----------------------------
 
@@ -49,7 +49,7 @@ Infer
     Infers JAR version based on a previously versioned JAR.
 
 -----------------------------
-% java -jar target/semantic-versioning-${project.version}.jar previousVersion previousJar currentJar (includes) (excludes)
+% java -jar semantic-versioning-${project.version}.jar previousVersion previousJar currentJar (includes) (excludes)
 1.0.0
 -----------------------------
 
@@ -58,6 +58,6 @@ Validate
     Validates JAR version based on a previously versioned JAR.
 
 -----------------------------
-% java -jar target/semantic-versioning-${project.version}.jar previousVersion previousJar currentVersion currentJar (includes) (excludes)
+% java -jar semantic-versioning-${project.version}.jar previousVersion previousJar currentVersion currentJar (includes) (excludes)
 true
 -----------------------------
