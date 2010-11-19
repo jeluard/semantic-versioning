@@ -26,7 +26,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.osjava.jardiff.DiffException;
 import org.osjava.jardiff.JarDiff;
 import org.osjava.jardiff.SimpleDiffCriteria;
-import org.semver.jardiff.AccumulatingDiffHandler;
+import org.semver.jardiff.DifferenceAccumulatingHandler;
 import org.semver.Delta.Difference;
 
 /**
@@ -65,7 +65,7 @@ public class Comparer {
             final JarDiff jarDiff = new JarDiff();
             jarDiff.loadOldClasses(this.previousJAR);
             jarDiff.loadNewClasses(this.currentJAR);
-            final AccumulatingDiffHandler handler = new AccumulatingDiffHandler(this.includes, this.excludes);
+            final DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler(this.includes, this.excludes);
             jarDiff.diff(handler, new SimpleDiffCriteria());
             return handler.getDelta();
         } catch (DiffException e) {

@@ -36,25 +36,29 @@ import org.semver.Delta.Remove;
 
 /**
  *
- * {@link org.osjava.jardiff.DiffHandler} implementation accumulating changes.
+ * {@link org.osjava.jardiff.DiffHandler} implementation accumulating {@link Difference}.
  *
  */
-public final class AccumulatingDiffHandler extends AbstractDiffHandler {
+public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
     
     private String currentClassName;
     private final Set<String> includes;
     private final Set<String> excludes;
     private final Set<Difference> differences = new HashSet<Difference>();
 
-    public AccumulatingDiffHandler() {
+    public DifferenceAccumulatingHandler() {
         this(Collections.<String>emptySet(), Collections.<String>emptySet());
     }
 
-    public AccumulatingDiffHandler(@Nonnull final Set<String> includes, @Nonnull final Set<String> excludes) {
+    public DifferenceAccumulatingHandler(@Nonnull final Set<String> includes, @Nonnull final Set<String> excludes) {
         this.includes = includes;
         this.excludes = excludes;
     }
 
+    public String getCurrentClassName() {
+        return this.currentClassName;
+    }
+    
     @Override
     public void startDiff(final String previous, final String current) throws DiffException {
     }
@@ -102,7 +106,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Add(this.currentClassName, fieldInfo));
+        this.differences.add(new Add(getCurrentClassName(), fieldInfo));
     }
 
     @Override
@@ -111,7 +115,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Add(this.currentClassName, methodInfo));
+        this.differences.add(new Add(getCurrentClassName(), methodInfo));
     }
 
     @Override
@@ -133,7 +137,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Change(this.currentClassName, oldClassInfo, newClassInfo));
+        this.differences.add(new Change(getClassName(oldClassInfo.getName()), oldClassInfo, newClassInfo));
     }
 
     @Override
@@ -142,7 +146,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Change(this.currentClassName, oldFieldInfo, newFieldInfo));
+        this.differences.add(new Change(getCurrentClassName(), oldFieldInfo, newFieldInfo));
     }
 
     @Override
@@ -151,7 +155,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Change(this.currentClassName, oldMethodInfo, newMethodInfo));
+        this.differences.add(new Change(getCurrentClassName(), oldMethodInfo, newMethodInfo));
     }
 
     @Override
@@ -172,7 +176,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Remove(this.currentClassName, classInfo));
+        this.differences.add(new Remove(getClassName(classInfo.getName()), classInfo));
     }
 
     @Override
@@ -181,7 +185,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Remove(this.currentClassName, fieldInfo));
+        this.differences.add(new Remove(getCurrentClassName(), fieldInfo));
     }
 
     @Override
@@ -190,7 +194,7 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
             return;
         }
 
-        this.differences.add(new Remove(this.currentClassName, methodInfo));
+        this.differences.add(new Remove(getCurrentClassName(), methodInfo));
     }
 
     @Override
@@ -209,14 +213,14 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
      */
     private boolean isConsidered() {
         for (final String exclude : this.excludes) {
-            if (this.currentClassName.startsWith(exclude)) {
+            if (getCurrentClassName().startsWith(exclude)) {
                 return false;
             }
         }
 
         if (!this.includes.isEmpty()) {
             for (final String include : this.includes) {
-                if (this.currentClassName.startsWith(include)) {
+                if (getCurrentClassName().startsWith(include)) {
                     return true;
                 }
             }
