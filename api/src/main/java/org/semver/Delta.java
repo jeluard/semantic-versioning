@@ -53,6 +53,13 @@ public class Delta {
         private final AbstractInfo info;
         
         public Difference(@Nonnull final String className, @Nonnull final AbstractInfo info) {
+            if (className == null) {
+                throw new IllegalArgumentException("null className");
+            }
+            if (info == null) {
+                throw new IllegalArgumentException("null info");
+            }
+            
             this.className = className;
             this.info = info;
         }
