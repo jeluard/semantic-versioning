@@ -43,7 +43,7 @@ public class VersionTest {
     }
 
     @Test
-    public void shouldValidVersionAreParsed() {
+    public void shouldValidVersionBeParsed() {
         Version.parse("1.2.3");
         Version.parse("1.2.3beta");
     }
@@ -61,6 +61,11 @@ public class VersionTest {
     @Test(expected=IllegalArgumentException.class)
     public void shouldInvalidVersion3NotBeParsed() {
         Version.parse("1.2.3.beta");
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void shouldInvalidVersion4NotBeParsed() {
+        Version.parse("1.2");
     }
 
     @Test
@@ -83,19 +88,6 @@ public class VersionTest {
         Assert.assertTrue(Version.parse("1.0.0Beta").compareTo(Version.parse("1.0.0Alpha")) < 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.0")) < 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.1")) < 0);
-    }
-
-    @Test
-    public void isAtLeast() {
-        Assert.assertTrue(Version.Type.MAJOR.isAtLeast(Version.Type.MAJOR));
-        Assert.assertTrue(Version.Type.MAJOR.isAtLeast(Version.Type.MINOR));
-        Assert.assertTrue(Version.Type.MAJOR.isAtLeast(Version.Type.PATCH));
-        Assert.assertFalse(Version.Type.MINOR.isAtLeast(Version.Type.MAJOR));
-        Assert.assertTrue(Version.Type.MINOR.isAtLeast(Version.Type.MINOR));
-        Assert.assertTrue(Version.Type.MINOR.isAtLeast(Version.Type.PATCH));
-        Assert.assertFalse(Version.Type.PATCH.isAtLeast(Version.Type.MAJOR));
-        Assert.assertFalse(Version.Type.PATCH.isAtLeast(Version.Type.MINOR));
-        Assert.assertTrue(Version.Type.PATCH.isAtLeast(Version.Type.PATCH));
     }
 
 }

@@ -23,24 +23,21 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  *
  * Version following semantic defined by <a href="http://semver.org/">Semantic Versioning</a> document.
  * 
  */
+@Immutable
 public final class Version implements Comparable<Version> {
     
     /**
-     * {@link Version} element type. From most meaningful to less meaningful.
+     * {@link Version} element. From most meaningful to less meaningful.
      */
-    public enum Type {
+    public enum Element {
         MAJOR, MINOR, PATCH, SPECIAL;
-
-        public boolean isAtLeast(@Nonnull final Version.Type type) {
-            return compareTo(type) <= 0;
-        }
-
     }
 
     private static final String FORMAT = "(\\d)\\.(\\d)\\.(\\d)([A-Za-z][0-9A-Za-z-]*)?";
@@ -57,13 +54,13 @@ public final class Version implements Comparable<Version> {
 
     public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch, @Nonnull final String special) {
         if (major < 0) {
-            throw new IllegalArgumentException(Type.MAJOR+" must be positive");
+            throw new IllegalArgumentException(Element.MAJOR+" must be positive");
         }
         if (minor < 0) {
-            throw new IllegalArgumentException(Type.MINOR+" must be positive");
+            throw new IllegalArgumentException(Element.MINOR+" must be positive");
         }
         if (patch < 0) {
-            throw new IllegalArgumentException(Type.PATCH+" must be positive");
+            throw new IllegalArgumentException(Element.PATCH+" must be positive");
         }
 
         this.major = major;
@@ -85,9 +82,9 @@ public final class Version implements Comparable<Version> {
             throw new IllegalArgumentException("<"+version+"> does not match format "+Version.FORMAT);
         }
 
-        final int major = Version.parseElement(matcher.group(1), Type.MAJOR);
-        final int minor = Version.parseElement(matcher.group(2), Type.MINOR);
-        final int patch = Version.parseElement(matcher.group(3), Type.PATCH);
+        final int major = Version.parseElement(matcher.group(1), Element.MAJOR);
+        final int minor = Version.parseElement(matcher.group(2), Element.MINOR);
+        final int patch = Version.parseElement(matcher.group(3), Element.PATCH);
 
         if (matcher.groupCount() == 4) {
             return new Version(major, minor, patch, matcher.group(4));
@@ -101,7 +98,7 @@ public final class Version implements Comparable<Version> {
      * @param type
      * @return int representation of provided number
      */
-    private @Nonnegative static int parseElement(@Nonnull final String number, @Nonnull final Version.Type type) {
+    private @Nonnegative static int parseElement(@Nonnull final String number, @Nonnull final Version.Element type) {
         try {
             return Integer.valueOf(number);
         } catch (NumberFormatException e) {
@@ -111,9 +108,9 @@ public final class Version implements Comparable<Version> {
 
     /**
      * @param type
-     * @return next {@link Version} regarding specified {@link Version.Type}
+     * @return next {@link Version} regarding specified {@link Version.Element}
      */
-    public Version next(@Nonnull final Version.Type type) {
+    public Version next(@Nonnull final Version.Element type) {
         switch (type) {
             case MAJOR:
                 return new Version(this.major+1, 0, 0);
@@ -123,24 +120,6 @@ public final class Version implements Comparable<Version> {
                 return new Version(this.major, this.minor, this.patch+1);
             default:
                 throw new IllegalArgumentException("Unknown type <"+type+">");
-        }
-    }
-
-    /**
-     * @param other
-     * @return most important differing {@link Version.Type} component between this and another {@link Version}, null if both are same.
-     */
-    public Version.Type delta(@Nonnull final Version other) {
-        if (this.major != other.major) {
-            return Version.Type.MAJOR;
-        } else if (this.minor != other.minor) {
-            return Version.Type.MINOR;
-        } else if (this.patch != other.patch) {
-            return Version.Type.PATCH;
-        } else if (this.special.equals(other.special)) {
-            return null;
-        } else {
-            return null;
         }
     }
 

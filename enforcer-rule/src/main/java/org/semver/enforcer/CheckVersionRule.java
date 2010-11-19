@@ -34,7 +34,9 @@ import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
-import org.semver.Checker;
+import org.semver.Comparer;
+import org.semver.Delta;
+import org.semver.Dumper;
 import org.semver.Version;
 
 /**
@@ -68,11 +70,11 @@ public final class CheckVersionRule implements EnforcerRule {
     private String[] excludes;
     
     /**
-     * Print changes details if current artifact is incompatible.
+     * Dump change details.
      *
      * @parameter
      */ 
-    private boolean printDetails = false;
+    private boolean dumpDetails = false;
     
     private Set<String> extractFilters(final String[] filtersAsStringArray) {
         if (filtersAsStringArray == null) {
@@ -111,14 +113,14 @@ public final class CheckVersionRule implements EnforcerRule {
         helper.getLog().info("Using <"+currentJar+"> as current JAR");
 
         try {
-            final Checker checker = new Checker();
-            final Checker.CompatibilityType compatibilityType = checker.check(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
-            final boolean compatible = Checker.isTypeCompatible(compatibilityType, previous.delta(current));
+            final Comparer comparer = new Comparer(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+            final Delta delta = comparer.diff();
+            final boolean compatible = delta.validate(previous, current);
             if (!compatible) {
-                if (this.printDetails) {
-                    checker.dumpDiff(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+                if (this.dumpDetails) {
+                    Dumper.dump(delta);
                 }
-                throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+Checker.inferNextVersion(previous, compatibilityType)+">.");
+                throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+delta.infer(previous)+">.");
             }
         } catch (IOException e) {
             throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);

@@ -24,11 +24,15 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import org.osjava.jardiff.AbstractDiffHandler;
-import org.osjava.jardiff.AbstractInfo;
 import org.osjava.jardiff.ClassInfo;
 import org.osjava.jardiff.DiffException;
 import org.osjava.jardiff.FieldInfo;
 import org.osjava.jardiff.MethodInfo;
+import org.semver.Delta;
+import org.semver.Delta.Add;
+import org.semver.Delta.Change;
+import org.semver.Delta.Difference;
+import org.semver.Delta.Remove;
 
 /**
  *
@@ -36,63 +40,6 @@ import org.osjava.jardiff.MethodInfo;
  *
  */
 public final class AccumulatingDiffHandler extends AbstractDiffHandler {
-
-    public static class Difference implements Comparable<Difference> {
-        
-        private final String className;
-        private final AbstractInfo info;
-        
-        public Difference(@Nonnull final String className, @Nonnull final AbstractInfo info) {
-            this.className = className;
-            this.info = info;
-        }
-
-        public String getClassName() {
-            return this.className;
-        }
-
-        public AbstractInfo getInfo() {
-            return info;
-        }
-
-        @Override
-        public int compareTo(final Difference other) {
-            return getClassName().compareTo(other.getClassName());
-        }
-        
-    }
-    
-    public static class Add extends Difference {
-        
-        public Add(@Nonnull final String className, @Nonnull final AbstractInfo info) {
-            super(className, info);
-        }
-        
-    }
-    
-    public static class Change extends Difference {
-        
-        private final AbstractInfo modifiedInfo;
-        
-        public Change(@Nonnull final String className, @Nonnull final AbstractInfo info, @Nonnull final AbstractInfo modifiedInfo) {
-            super(className, info);
-            
-            this.modifiedInfo = modifiedInfo;
-        }
-
-        public AbstractInfo getModifiedInfo() {
-            return this.modifiedInfo;
-        }
-        
-    }
-    
-    public class Remove extends Difference {
-        
-        public Remove(@Nonnull final String className, @Nonnull final AbstractInfo info) {
-            super(className, info);
-        }
-        
-    }
     
     private String currentClassName;
     private final Set<String> includes;
@@ -278,8 +225,8 @@ public final class AccumulatingDiffHandler extends AbstractDiffHandler {
         return true;
     }
 
-    public Set<Difference> getDifferences() {
-        return Collections.unmodifiableSet(this.differences);
+    public Delta getDelta() {
+        return new Delta(this.differences);
     }
 
 }
