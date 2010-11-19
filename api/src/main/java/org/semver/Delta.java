@@ -107,7 +107,7 @@ public class Delta {
     private final Set<Difference> differences;
     
     public Delta(@Nonnull final Set<Difference> differences) {
-        this.differences = Collections.unmodifiableSet(this.differences);
+        this.differences = Collections.unmodifiableSet(differences);
     }
 
     public Set<Difference> getDifferences() {
