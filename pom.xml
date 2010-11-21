@@ -161,6 +161,7 @@
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
                     <preparationGoals>clean install</preparationGoals>
+                    <tag>v${project.version}</tag>
                 </configuration>
             </plugin>
 
