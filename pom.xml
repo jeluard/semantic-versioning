@@ -74,8 +74,13 @@
                     <header>LICENSE</header>
                     <failIfMissing>true</failIfMissing>
                     <aggregate>true</aggregate>
+                    <strictCheck>true</strictCheck>
                     <excludes>
+                        <exclude>.gitignore</exclude>
                         <exclude>README.textile</exclude>
+                        <exclude>LICENSE</exclude>
+                        <exclude>NOTICE</exclude>
+                        <exclude>licenses/*</exclude>
                         <exclude>**/dependency-reduced-pom.xml</exclude>
                     </excludes>
                 </configuration>
