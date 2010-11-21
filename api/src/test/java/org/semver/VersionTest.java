@@ -68,6 +68,11 @@ public class VersionTest {
         Version.parse("1.2");
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void shouldInvalidVersion5NotBeParsed() {
+        Version.parse("a.2.3");
+    }
+
     @Test
     public void shouldDevelopmentBeInDevelopment() {
         Assert.assertTrue(Version.parse("0.1.1").isInDevelopment());
@@ -83,11 +88,36 @@ public class VersionTest {
     @Test
     public void isNewer() {
         Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("0.0.0")) < 0);
+        Assert.assertTrue(Version.parse("0.0.0").compareTo(Version.parse("1.0.0")) > 0);
         Assert.assertTrue(Version.parse("1.1.0").compareTo(Version.parse("1.0.0")) < 0);
+        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.1.0")) > 0);
         Assert.assertTrue(Version.parse("1.0.1").compareTo(Version.parse("1.0.0")) < 0);
+        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.0.1")) > 0);
         Assert.assertTrue(Version.parse("1.0.0Beta").compareTo(Version.parse("1.0.0Alpha")) < 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.0")) < 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.1")) < 0);
     }
 
+    @Test
+    public void next() {
+        final int major = 1;
+        final int minor = 2;
+        final int patch = 3;
+        final Version version = new Version(major, minor, patch);
+
+        Assert.assertEquals(version.next(Version.Element.MAJOR), new Version(major+1, 0, 0));
+        Assert.assertEquals(version.next(Version.Element.MINOR), new Version(major, minor+1, 0));
+        Assert.assertEquals(version.next(Version.Element.PATCH), new Version(major, minor, patch+1));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void shouldNextWithNullComparisonTypeFail() {
+        final int major = 1;
+        final int minor = 2;
+        final int patch = 3;
+        final Version version = new Version(major, minor, patch);
+
+        version.next(null);
+    }  
+    
 }

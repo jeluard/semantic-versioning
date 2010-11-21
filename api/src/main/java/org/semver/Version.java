@@ -52,7 +52,7 @@ public final class Version implements Comparable<Version> {
         this(major, minor, patch, null);
     }
 
-    public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch, @Nonnull final String special) {
+    public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch, @Nullable final String special) {
         if (major < 0) {
             throw new IllegalArgumentException(Element.MAJOR+" must be positive");
         }
@@ -82,36 +82,23 @@ public final class Version implements Comparable<Version> {
             throw new IllegalArgumentException("<"+version+"> does not match format "+Version.FORMAT);
         }
 
-        final int major = Version.parseElement(matcher.group(1), Element.MAJOR);
-        final int minor = Version.parseElement(matcher.group(2), Element.MINOR);
-        final int patch = Version.parseElement(matcher.group(3), Element.PATCH);
+        final int major = Integer.valueOf(matcher.group(1));
+        final int minor = Integer.valueOf(matcher.group(2));
+        final int patch = Integer.valueOf(matcher.group(3));
 
-        if (matcher.groupCount() == 4) {
-            return new Version(major, minor, patch, matcher.group(4));
-        } else {
-            return new Version(major, minor, patch);
-        }
+        return new Version(major, minor, patch, matcher.group(4));
     }
-
-    /**
-     * @param number
-     * @param type
-     * @return int representation of provided number
-     */
-    private @Nonnegative static int parseElement(@Nonnull final String number, @Nonnull final Version.Element type) {
-        try {
-            return Integer.valueOf(number);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(type+" must be an integer", e);
-        }
-    }
-
+    
     /**
      * @param type
      * @return next {@link Version} regarding specified {@link Version.Element}
      */
-    public Version next(@Nonnull final Version.Element type) {
-        switch (type) {
+    public Version next(@Nonnull final Version.Element element) {
+        if (element == null) {
+            throw new IllegalArgumentException("null element");
+        }
+
+        switch (element) {
             case MAJOR:
                 return new Version(this.major+1, 0, 0);
             case MINOR:
@@ -119,7 +106,7 @@ public final class Version implements Comparable<Version> {
             case PATCH:
                 return new Version(this.major, this.minor, this.patch+1);
             default:
-                throw new IllegalArgumentException("Unknown type <"+type+">");
+                throw new IllegalArgumentException("Unknown element <"+element+">");
         }
     }
 

@@ -27,7 +27,6 @@ import org.osjava.jardiff.DiffException;
 import org.osjava.jardiff.JarDiff;
 import org.osjava.jardiff.SimpleDiffCriteria;
 import org.semver.jardiff.DifferenceAccumulatingHandler;
-import org.semver.Delta.Difference;
 
 /**
  * 
