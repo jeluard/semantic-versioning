@@ -52,6 +52,7 @@
                             </transformers>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>full</shadedClassifierName>
+        	            <finalName>semver-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
