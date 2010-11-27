@@ -33,6 +33,7 @@ import org.apache.maven.enforcer.rule.api.EnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.util.StringUtils;
 import org.semver.Comparer;
 import org.semver.Delta;
@@ -88,12 +89,23 @@ public final class CheckVersionRule implements EnforcerRule {
         if (StringUtils.isEmpty(this.previousVersion)) {
             throw new EnforcerRuleException("previousVersion can't be empty");
         }
+
+        final MavenProject project;
+        try {
+            project = (MavenProject) helper.evaluate("${project}");
+        } catch (ExpressionEvaluationException e) {
+            throw new EnforcerRuleException("Failed to access ${project} variable", e);
+        }
+        final String type = project.getArtifact().getType();
+        if (!"jar".equals(type)) {
+            throw new IllegalArgumentException("Only support 'jar' as artifact type");
+        }
+            
         final Artifact previousArtifact;
         final Artifact currentArtifact;
         try {
-            final MavenProject project = (MavenProject) helper.evaluate("${project}");
             final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
-            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), this.previousVersion, null, "jar");
+            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), this.previousVersion, null, type);
             final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             final ArtifactRepository localRepository = (ArtifactRepository) helper.evaluate("${localRepository}");
             resolver.resolve(previousArtifact, project.getRemoteArtifactRepositories(), localRepository);
@@ -102,7 +114,7 @@ public final class CheckVersionRule implements EnforcerRule {
             validateArtifact(previousArtifact);
             validateArtifact(currentArtifact);
         } catch (Exception e) {
-            throw new EnforcerRuleException("Exception while accessing artifacts: "+e.toString(), e);
+            throw new EnforcerRuleException("Exception while accessing artifacts", e);
         }     
             
         final Version previous = Version.parse(previousArtifact.getVersion());
