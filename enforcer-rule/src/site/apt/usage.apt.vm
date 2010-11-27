@@ -58,11 +58,7 @@ Usage
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
-                  ...
-                  <previousVersion>1.0.0</previousVersion>
-                  ...
-                </checkVersionRule>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule" />
               </rules>
             </configuration>
           </execution>
@@ -78,7 +74,6 @@ Usage
 </project>
 ---
 
-  Once you have configured your project with details of the previous version to check, maven-enforcer will be able to
-  throw a build error if current version is not backward compatible with previous one. 
+  Once you have configured your project, maven-enforcer will be able to throw a build error if current version is not backward compatible with last released one. 
 
   Some more detailed {{{./examples/checking-version.html}examples}} of the <<<checkVersionRule>>> rule.

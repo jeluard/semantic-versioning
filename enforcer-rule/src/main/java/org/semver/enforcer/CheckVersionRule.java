@@ -23,18 +23,22 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.enforcer.rule.api.EnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
-import org.codehaus.plexus.util.StringUtils;
 import org.semver.Comparer;
 import org.semver.Delta;
 import org.semver.Dumper;
@@ -86,10 +90,6 @@ public final class CheckVersionRule implements EnforcerRule {
     
     @Override
     public void execute(final EnforcerRuleHelper helper) throws EnforcerRuleException {
-        if (StringUtils.isEmpty(this.previousVersion)) {
-            throw new EnforcerRuleException("previousVersion can't be empty");
-        }
-
         final MavenProject project;
         try {
             project = (MavenProject) helper.evaluate("${project}");
@@ -104,10 +104,29 @@ public final class CheckVersionRule implements EnforcerRule {
         final Artifact previousArtifact;
         final Artifact currentArtifact;
         try {
-            final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
-            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), this.previousVersion, null, type);
-            final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             final ArtifactRepository localRepository = (ArtifactRepository) helper.evaluate("${localRepository}");
+            final String version;
+            if (this.previousVersion != null) {
+                version = this.previousVersion;
+
+                helper.getLog().info("Version specified as <"+version+">");
+            } else {                
+                final ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) helper.getComponent(ArtifactMetadataSource.class);
+                final List<ArtifactVersion> availableVersions = getAvailableVersions(artifactMetadataSource, project, localRepository);
+                
+                if (availableVersions.isEmpty()) {
+                    helper.getLog().info("No previously released version. Backward compatibility check not performed.");
+                    
+                    return;
+                }
+
+                version = availableVersions.iterator().next().toString();
+                
+                helper.getLog().info("Version deduced as <"+version+"> (among all availables: "+availableVersions+")");
+            }
+            final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
+            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), version, null, type);
+            final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             resolver.resolve(previousArtifact, project.getRemoteArtifactRepositories(), localRepository);
             currentArtifact = project.getArtifact();
             
@@ -121,9 +140,10 @@ public final class CheckVersionRule implements EnforcerRule {
         final File previousJar = previousArtifact.getFile();
         final Version current = Version.parse(currentArtifact.getVersion());
         final File currentJar = currentArtifact.getFile();
+
         helper.getLog().info("Using <"+previousJar+"> as previous JAR");
         helper.getLog().info("Using <"+currentJar+"> as current JAR");
-
+        
         try {
             final Comparer comparer = new Comparer(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
             final Delta delta = comparer.diff();
@@ -140,15 +160,27 @@ public final class CheckVersionRule implements EnforcerRule {
     }
 
     /**
-     * Validates that specified {@link Artifact} is a JAR file.
+     * @param artifactMetadataSource
+     * @param project
+     * @param localRepository
+     * @return all available versions from most recent to oldest
+     * @throws ArtifactMetadataRetrievalException 
+     */
+    protected final List<ArtifactVersion> getAvailableVersions(final ArtifactMetadataSource artifactMetadataSource, final MavenProject project, final ArtifactRepository localRepository) throws ArtifactMetadataRetrievalException {
+        final List<ArtifactVersion> availableVersions = artifactMetadataSource.retrieveAvailableVersions(project.getArtifact(), localRepository, project.getRemoteArtifactRepositories());
+        availableVersions.remove(new DefaultArtifactVersion(project.getArtifact().getVersion()));
+        Collections.sort(availableVersions);
+        Collections.reverse(availableVersions);
+        return availableVersions;
+    }
+    
+    /**
+     * Validates that specified {@link Artifact} is a file.
      * @param artifact
      */
     private void validateArtifact(final Artifact artifact) {
         if (!artifact.getFile().isFile()) {
             throw new IllegalArgumentException("<"+artifact.getFile()+"> is not a file");
-        }
-        if (!artifact.getType().equalsIgnoreCase("jar")) {
-            throw new IllegalArgumentException("<"+artifact.getFile()+"> is not a JAR");
         }
     }
 

@@ -21,7 +21,60 @@ Checking a project's version against older releases
 * Basic example
 
   In order to check your project's version against an older release, you must add the enforcer rule as a dependency to
-  the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule:
+  the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule.
+
+  By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories).
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule" />
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+* Checking against a specific released version
+
+  You can check your project against a specific released version:
 
 ---
 <project>
@@ -74,9 +127,6 @@ Checking a project's version against older releases
 </project>
 ---
 
-  Once you have configured your project with details of the previous version to check, maven-enforcer will be able to
-  throw a build error if current version is not backward compatible with previous one.  
-
 * Including classes 
 
   By default all classes will be considered during checking process. You might want to only check a subset of classes/packages. This is achieved by specifying <<<includes>>>.
@@ -114,7 +164,6 @@ Checking a project's version against older releases
               <rules>
                 <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
                   ...
-                  <previousVersion>1.0.0</previousVersion>
                   <includes>
                     <include>org.project.MyClass</include>
                   </includes>
@@ -170,7 +219,6 @@ Checking a project's version against older releases
               <rules>
                 <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
                   ...
-                  <previousVersion>1.0.0</previousVersion>
                   <includes>
                     <include>org.project.MyClass</include>
                     <include>org.project.internal</include>
@@ -229,7 +277,6 @@ Checking a project's version against older releases
               <rules>
                 <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
                   ...
-                  <previousVersion>1.0.0</previousVersion>
                   <excludes>
                     <exclude>org.project.MyClass</exclude>
                   </excludes>
