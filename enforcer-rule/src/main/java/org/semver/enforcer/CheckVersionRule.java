@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +40,7 @@ import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
+import org.codehaus.plexus.util.CollectionUtils;
 import org.semver.Comparer;
 import org.semver.Delta;
 import org.semver.Dumper;
@@ -53,6 +55,8 @@ import org.semver.Version;
  */
 public final class CheckVersionRule implements EnforcerRule {
 
+    private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
+    
     /**
      * Version number of artifact to be checked.
      *
@@ -112,7 +116,7 @@ public final class CheckVersionRule implements EnforcerRule {
                 helper.getLog().info("Version specified as <"+version+">");
             } else {                
                 final ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) helper.getComponent(ArtifactMetadataSource.class);
-                final List<ArtifactVersion> availableVersions = getAvailableVersions(artifactMetadataSource, project, localRepository);
+                final List<ArtifactVersion> availableVersions = getAvailableReleasedVersions(artifactMetadataSource, project, localRepository);
                 
                 if (availableVersions.isEmpty()) {
                     helper.getLog().info("No previously released version. Backward compatibility check not performed.");
@@ -159,6 +163,10 @@ public final class CheckVersionRule implements EnforcerRule {
         }
     }
 
+    protected final boolean isSnapshot(final ArtifactVersion artifactVersion) {
+        return artifactVersion.toString().endsWith(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX);
+    }
+    
     /**
      * @param artifactMetadataSource
      * @param project
@@ -166,8 +174,14 @@ public final class CheckVersionRule implements EnforcerRule {
      * @return all available versions from most recent to oldest
      * @throws ArtifactMetadataRetrievalException 
      */
-    protected final List<ArtifactVersion> getAvailableVersions(final ArtifactMetadataSource artifactMetadataSource, final MavenProject project, final ArtifactRepository localRepository) throws ArtifactMetadataRetrievalException {
+    protected final List<ArtifactVersion> getAvailableReleasedVersions(final ArtifactMetadataSource artifactMetadataSource, final MavenProject project, final ArtifactRepository localRepository) throws ArtifactMetadataRetrievalException {
         final List<ArtifactVersion> availableVersions = artifactMetadataSource.retrieveAvailableVersions(project.getArtifact(), localRepository, project.getRemoteArtifactRepositories());
+        for (final Iterator<ArtifactVersion> iterator = availableVersions.iterator(); iterator.hasNext();) {
+            final ArtifactVersion artifactVersion = iterator.next();
+            if (isSnapshot(artifactVersion)) {
+                iterator.remove();
+            }
+        }
         availableVersions.remove(new DefaultArtifactVersion(project.getArtifact().getVersion()));
         Collections.sort(availableVersions);
         Collections.reverse(availableVersions);
