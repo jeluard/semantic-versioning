@@ -40,7 +40,6 @@ import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
-import org.codehaus.plexus.util.CollectionUtils;
 import org.semver.Comparer;
 import org.semver.Delta;
 import org.semver.Dumper;
@@ -140,9 +139,9 @@ public final class CheckVersionRule implements EnforcerRule {
             throw new EnforcerRuleException("Exception while accessing artifacts", e);
         }     
             
-        final Version previous = Version.parse(previousArtifact.getVersion());
+        final Version previous = Version.parse(getVersion(previousArtifact));
         final File previousJar = previousArtifact.getFile();
-        final Version current = Version.parse(currentArtifact.getVersion());
+        final Version current = Version.parse(getVersion(currentArtifact));
         final File currentJar = currentArtifact.getFile();
 
         helper.getLog().info("Using <"+previousJar+"> as previous JAR");
@@ -163,7 +162,19 @@ public final class CheckVersionRule implements EnforcerRule {
         }
     }
 
-    protected final boolean isSnapshot(final ArtifactVersion artifactVersion) {
+    protected final String getVersion(final Artifact artifact) {
+        final String version = artifact.getVersion();
+        if (version.contains(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX)) {
+            return version.substring(0, version.indexOf(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX));
+        }
+        return version;
+    }
+    
+    /**
+     * @param artifactVersion
+     * @return true if specified version is a snapshot version
+     */
+    protected final boolean isSnapshotVersion(final ArtifactVersion artifactVersion) {
         return artifactVersion.toString().endsWith(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX);
     }
     
@@ -176,13 +187,13 @@ public final class CheckVersionRule implements EnforcerRule {
      */
     protected final List<ArtifactVersion> getAvailableReleasedVersions(final ArtifactMetadataSource artifactMetadataSource, final MavenProject project, final ArtifactRepository localRepository) throws ArtifactMetadataRetrievalException {
         final List<ArtifactVersion> availableVersions = artifactMetadataSource.retrieveAvailableVersions(project.getArtifact(), localRepository, project.getRemoteArtifactRepositories());
+        availableVersions.remove(new DefaultArtifactVersion(project.getArtifact().getVersion()));
         for (final Iterator<ArtifactVersion> iterator = availableVersions.iterator(); iterator.hasNext();) {
             final ArtifactVersion artifactVersion = iterator.next();
-            if (isSnapshot(artifactVersion)) {
+            if (isSnapshotVersion(artifactVersion)) {
                 iterator.remove();
             }
         }
-        availableVersions.remove(new DefaultArtifactVersion(project.getArtifact().getVersion()));
         Collections.sort(availableVersions);
         Collections.reverse(availableVersions);
         return availableVersions;
