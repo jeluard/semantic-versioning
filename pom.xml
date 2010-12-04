@@ -7,7 +7,7 @@
     <version>0.9.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Semantic Versioning Parent</name>
+    <name>Semantic Versioning</name>
     <inceptionYear>2010</inceptionYear>
     <url>http://github.com/jeluard/semantic-versioning</url>
     

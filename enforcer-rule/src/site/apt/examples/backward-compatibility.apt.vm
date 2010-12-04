@@ -16,11 +16,11 @@
  * the License.
  *#
 
-Checking a project's version against older releases 
+Checking a project's compatibility against older releases 
 
 * Basic example
 
-  In order to check your project's version against an older release, you must add the enforcer rule as a dependency to
+  In order to check your project's compatibility against an older release, you must add the enforcer rule as a dependency to
   the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule.
 
   By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories).
@@ -56,7 +56,9 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule" />
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
+                </requireBackwardCompatibility>
               </rules>
             </configuration>
           </execution>
@@ -107,11 +109,12 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
                   ...
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
                   <previousVersion>1.0.0</previousVersion>
                   ...
-                </checkVersionRule>
+                </requireBackwardCompatibility>
               </rules>
             </configuration>
           </execution>
@@ -162,13 +165,14 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
                   ...
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
                   <includes>
                     <include>org.project.MyClass</include>
                   </includes>
                   ...
-                </checkVersionRule>
+                </requireBackwardCompatibility>
               </rules>
             </configuration>
           </execution>
@@ -217,14 +221,15 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
                   ...
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
                   <includes>
                     <include>org.project.MyClass</include>
                     <include>org.project.internal</include>
                   </includes>
                   ...
-                </checkVersionRule>
+                </requireBackwardCompatibility>
               </rules>
             </configuration>
           </execution>
@@ -275,13 +280,14 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule">
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
                   ...
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
                   <excludes>
                     <exclude>org.project.MyClass</exclude>
                   </excludes>
                   ...
-                </checkVersionRule>
+                </requireBackwardCompatibility>
               </rules>
             </configuration>
           </execution>

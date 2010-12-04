@@ -47,12 +47,10 @@ import org.semver.Version;
 
 /**
  * 
- * Checks {@link Version} for current {@link Artifact} compared to a previous {@link Artifact}.
- * <br />
- * Fails if {@link Version} semantic is not respected.
+ * Abstract {@link EnforcerRule} implementation providing facilities for compatibility checking.
  * 
  */
-public final class CheckVersionRule implements EnforcerRule {
+public abstract class AbstractEnforcerRule implements EnforcerRule {
 
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
     
@@ -118,7 +116,7 @@ public final class CheckVersionRule implements EnforcerRule {
                 final List<ArtifactVersion> availableVersions = getAvailableReleasedVersions(artifactMetadataSource, project, localRepository);
                 
                 if (availableVersions.isEmpty()) {
-                    helper.getLog().info("No previously released version. Backward compatibility check not performed.");
+                    helper.getLog().warn("No previously released version. Backward compatibility check not performed.");
                     
                     return;
                 }
@@ -150,22 +148,26 @@ public final class CheckVersionRule implements EnforcerRule {
         try {
             final Comparer comparer = new Comparer(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
             final Delta delta = comparer.diff();
-            final boolean compatible = delta.validate(previous, current);
-            if (!compatible) {
-                if (this.dumpDetails) {
-                    Dumper.dump(delta);
-                }
-                throw new EnforcerRuleException("Current codebase incompatible with version <"+current+">. Version should be at least <"+delta.infer(previous)+">.");
-            }
+
+            enforce(delta, previous, current);
         } catch (IOException e) {
             throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);
         }
     }
 
+    protected abstract void enforce(final Delta delta, final Version previous, final Version current) throws EnforcerRuleException;
+    
+    protected final void fail(final Delta delta, final String message) throws EnforcerRuleException {
+        if (this.dumpDetails) {
+            Dumper.dump(delta);
+        }
+        throw new EnforcerRuleException(message);
+    }
+    
     protected final String getVersion(final Artifact artifact) {
         final String version = artifact.getVersion();
-        if (version.contains(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX)) {
-            return version.substring(0, version.indexOf(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX));
+        if (version.contains(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX)) {
+            return version.substring(0, version.indexOf(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX));
         }
         return version;
     }
@@ -175,7 +177,7 @@ public final class CheckVersionRule implements EnforcerRule {
      * @return true if specified version is a snapshot version
      */
     protected final boolean isSnapshotVersion(final ArtifactVersion artifactVersion) {
-        return artifactVersion.toString().endsWith(CheckVersionRule.SNAPSHOT_VERSION_SUFFIX);
+        return artifactVersion.toString().endsWith(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX);
     }
     
     /**

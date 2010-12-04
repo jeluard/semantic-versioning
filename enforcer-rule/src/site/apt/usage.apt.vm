@@ -22,6 +22,65 @@ Usage
 
 * Basic Usage
 
+** Checking a project's compatibility
+
+  In order to check your project's compatibility, you must add the enforcer rule as a dependency to
+  the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run the rule:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
+                  <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
+                </requireBackwardCompatibility>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+
+  Once you have configured your project, maven-enforcer will be able to throw a build error if current version is not backward compatible with last released one. 
+
+  Some more detailed {{{./examples/backward-compatibility.html}examples}} of the <<<requireBacwardCompatibility>>> rule.
+
+
 ** Checking a project's version
 
   In order to check your project's version, you must add the enforcer rule as a dependency to
@@ -58,7 +117,7 @@ Usage
             </goals>
             <configuration>
               <rules>
-                <checkVersionRule implementation="org.semver.enforcer.CheckVersionRule" />
+                <requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance" />
               </rules>
             </configuration>
           </execution>
@@ -74,6 +133,6 @@ Usage
 </project>
 ---
 
-  Once you have configured your project, maven-enforcer will be able to throw a build error if current version is not backward compatible with last released one. 
+  Once you have configured your project, maven-enforcer will be able to throw a build error if current version follows semantic versioning principles. 
 
-  Some more detailed {{{./examples/checking-version.html}examples}} of the <<<checkVersionRule>>> rule.
+  Some more detailed {{{./examples/semantic-versioning-conformance.html}examples}} of the <<<requireSemanticVersioningConformance>>> rule.
