@@ -53,6 +53,7 @@ import org.semver.Version;
 public abstract class AbstractEnforcerRule implements EnforcerRule {
 
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
+    private static final String JAR_ARTIFACT_TYPE = "jar";
     
     /**
      * Version number of artifact to be checked.
@@ -98,8 +99,8 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             throw new EnforcerRuleException("Failed to access ${project} variable", e);
         }
         final String type = project.getArtifact().getType();
-        if (!"jar".equals(type)) {
-            throw new IllegalArgumentException("Only support 'jar' as artifact type");
+        if (!JAR_ARTIFACT_TYPE.equals(type)) {
+            throw new IllegalArgumentException("Only support '"+JAR_ARTIFACT_TYPE+"' as artifact type");
         }
             
         final Artifact previousArtifact;
