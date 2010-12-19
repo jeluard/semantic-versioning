@@ -100,7 +100,8 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         }
         final String type = project.getArtifact().getType();
         if (!JAR_ARTIFACT_TYPE.equals(type)) {
-            throw new IllegalArgumentException("Only support '"+JAR_ARTIFACT_TYPE+"' as artifact type");
+            helper.getLog().debug("Skipping non "+JAR_ARTIFACT_TYPE+" artifact.");
+            return;
         }
             
         final Artifact previousArtifact;
