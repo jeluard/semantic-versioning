@@ -7,7 +7,7 @@
 '/Users/julien/Documents/Projects/semantic-versioning/target/checkout/api/src/test/java'
 -author
 -bottom
-'Copyright &#169; 2010. All Rights Reserved.'
+'Copyright &#169; 2010-2011. All Rights Reserved.'
 -charset
 'UTF-8'
 -d
@@ -15,10 +15,10 @@
 -docencoding
 'UTF-8'
 -doctitle
-'API 0.9.4 Test API'
+'API 0.9.5 Test API'
 -link
 'http://java.sun.com/javase/6/docs/api'
 -use
 -version
 -windowtitle
-'API 0.9.4 Test API'
+'API 0.9.5 Test API'
