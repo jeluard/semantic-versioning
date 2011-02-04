@@ -28,7 +28,7 @@
         
                 <div class="xleft">
         <span id="publishDate">Last Published: 2011-02-04</span>
-                  &nbsp;| <span id="projectVersion">Version: 0.9.5</span>
+                  &nbsp;| <span id="projectVersion">Version: 0.9.6</span>
                       </div>
             <div class="xright">        
         
@@ -74,16 +74,16 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section"><h2>What is this?<a name="What_is_this"></a></h2><p>This simple command line tool looks at Java JAR files and determine API changes. You might download self contained JAR file from <a class="externalLink" href="https://github.com/downloads/jeluard/semantic-versioning/semver-0.9.5.jar">github</a>.</p></div><div class="section"><h2>Diff<a name="Diff"></a></h2><p>Dumps all changes between two JARs on standard output.</p><div><pre>% java -jar semantic-versioning-0.9.5.jar previousJar currentJar (includes) (excludes)
+        <div class="section"><h2>What is this?<a name="What_is_this"></a></h2><p>This simple command line tool looks at Java JAR files and determine API changes. You might download self contained JAR file from <a class="externalLink" href="https://github.com/downloads/jeluard/semantic-versioning/semver-0.9.6.jar">github</a>.</p></div><div class="section"><h2>Diff<a name="Diff"></a></h2><p>Dumps all changes between two JARs on standard output.</p><div><pre>% java -jar semantic-versioning-0.9.6.jar previousJar currentJar (includes) (excludes)
 Class org.project.MyClass
  Added Class 
 Class org.project.MyClass2
  Added Method method1
  Removed Field field1
  Changed Field field2 removed: final
-</pre></div></div><div class="section"><h2>Check<a name="Check"></a></h2><p>Checks compatibility type between two JARs.</p><div><pre>% java -jar semantic-versioning-0.9.5.jar previousJar currentJar (includes) (excludes)
-BACKWARD_COMPATIBLE_IMPLEMENTER</pre></div></div><div class="section"><h2>Infer<a name="Infer"></a></h2><p>Infers JAR version based on a previously versioned JAR.</p><div><pre>% java -jar semantic-versioning-0.9.5.jar previousVersion previousJar currentJar (includes) (excludes)
-1.0.0</pre></div></div><div class="section"><h2>Validate<a name="Validate"></a></h2><p>Validates JAR version based on a previously versioned JAR.</p><div><pre>% java -jar semantic-versioning-0.9.5.jar previousVersion previousJar currentVersion currentJar (includes) (excludes)
+</pre></div></div><div class="section"><h2>Check<a name="Check"></a></h2><p>Checks compatibility type between two JARs.</p><div><pre>% java -jar semantic-versioning-0.9.6.jar previousJar currentJar (includes) (excludes)
+BACKWARD_COMPATIBLE_IMPLEMENTER</pre></div></div><div class="section"><h2>Infer<a name="Infer"></a></h2><p>Infers JAR version based on a previously versioned JAR.</p><div><pre>% java -jar semantic-versioning-0.9.6.jar previousVersion previousJar currentJar (includes) (excludes)
+1.0.0</pre></div></div><div class="section"><h2>Validate<a name="Validate"></a></h2><p>Validates JAR version based on a previously versioned JAR.</p><div><pre>% java -jar semantic-versioning-0.9.6.jar previousVersion previousJar currentVersion currentJar (includes) (excludes)
 true</pre></div></div>
       </div>
     </div>
