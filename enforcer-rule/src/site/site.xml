@@ -27,7 +27,8 @@
             <item name="Usage" href="usage.html" />
         </menu>
         <menu name="Examples">
-            <item name="Checking a project version number" href="examples/checking-version.html" />
+            <item name="Checking a project backward compatibility" href="examples/backward-compatibility.html" />
+            <item name="Checking a project version number" href="examples/semantic-versioning-conformance.html" />
         </menu>
         <menu ref="reports" />
     </body>

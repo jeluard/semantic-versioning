@@ -23,7 +23,7 @@ Checking a project's version against older releases
   In order to check your project's version against an older release, you must add the enforcer rule as a dependency to
   the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule.
 
-  By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories).
+  By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories). Setting dumpDetails to true will output differences to standard output.
 
 ---
 <project>
@@ -56,7 +56,9 @@ Checking a project's version against older releases
             </goals>
             <configuration>
               <rules>
-                <requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance" />
+                <requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance">
+                  <dumpDetails>true</dumpDetails>
+                </requireSemanticVersioningConformance>
               </rules>
             </configuration>
           </execution>

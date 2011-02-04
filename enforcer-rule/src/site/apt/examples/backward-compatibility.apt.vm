@@ -23,7 +23,7 @@ Checking a project's compatibility against older releases
   In order to check your project's compatibility against an older release, you must add the enforcer rule as a dependency to
   the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule.
 
-  By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories).
+  By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories). Setting dumpDetails to true will output differences to standard output.
 
 ---
 <project>
@@ -58,6 +58,7 @@ Checking a project's compatibility against older releases
               <rules>
                 <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
                   <compatibilityType>BACKWARD_COMPATIBLE_IMPLEMENTER</compatibilityType>
+                  <dumpDetails>true</dumpDetails>
                 </requireBackwardCompatibility>
               </rules>
             </configuration>
