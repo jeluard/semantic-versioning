@@ -93,7 +93,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void classAdded(final ClassInfo classInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(classInfo.getName())) {
             return;
         }
 
@@ -102,7 +102,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void fieldAdded(final FieldInfo fieldInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -111,7 +111,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void methodAdded(final MethodInfo methodInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -133,7 +133,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void classChanged(final ClassInfo oldClassInfo, final ClassInfo newClassInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(oldClassInfo.getName())) {
             return;
         }
 
@@ -142,7 +142,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void fieldChanged(final FieldInfo oldFieldInfo, final FieldInfo newFieldInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -151,7 +151,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void methodChanged(final MethodInfo oldMethodInfo, final MethodInfo newMethodInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -172,7 +172,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void classRemoved(final ClassInfo classInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(classInfo.getName())) {
             return;
         }
 
@@ -181,7 +181,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void fieldRemoved(final FieldInfo fieldInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -190,7 +190,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
 
     @Override
     public void methodRemoved(final MethodInfo methodInfo) throws DiffException {
-        if (!isConsidered()) {
+        if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
@@ -211,16 +211,16 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
      *
      * @return
      */
-    private boolean isConsidered() {
+    private boolean isClassConsidered(final String className) {
         for (final String exclude : this.excludes) {
-            if (getCurrentClassName().startsWith(exclude)) {
+            if (className.startsWith(exclude)) {
                 return false;
             }
         }
 
         if (!this.includes.isEmpty()) {
             for (final String include : this.includes) {
-                if (getCurrentClassName().startsWith(include)) {
+                if (className.startsWith(include)) {
                     return true;
                 }
             }
