@@ -53,7 +53,7 @@ public final class RequireBackwardCompatibility extends AbstractEnforcerRule {
         }
 
         final Delta.CompatibilityType detectedCompatibilityType = delta.computeCompatibilityType();
-        if (detectedCompatibilityType != expectedCompatibilityType) {
+        if (detectedCompatibilityType.compareTo(expectedCompatibilityType) > 0) {
             fail(delta, "Current codebase is not backward compatible ("+this.compatibilityType+") with version <"+previous+">. Compatibility type has been detected as <"+detectedCompatibilityType+">");
         }
     }
