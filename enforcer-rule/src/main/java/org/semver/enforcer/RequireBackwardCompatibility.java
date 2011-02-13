@@ -20,6 +20,7 @@ package org.semver.enforcer;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
+import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.semver.Delta;
 import org.semver.Version;
 
@@ -39,8 +40,10 @@ public final class RequireBackwardCompatibility extends AbstractEnforcerRule {
      */
     private String compatibilityType;
 
+    private boolean strictChecking = false;
+
     @Override
-    protected void enforce(final Delta delta, final Version previous, final Version current) throws EnforcerRuleException {
+    protected void enforce(final EnforcerRuleHelper helper, final Delta delta, final Version previous, final Version current) throws EnforcerRuleException {
         if (this.compatibilityType == null) {
             throw new IllegalArgumentException("A value for compatibilityType attribute must be provided.");
         }
@@ -53,8 +56,18 @@ public final class RequireBackwardCompatibility extends AbstractEnforcerRule {
         }
 
         final Delta.CompatibilityType detectedCompatibilityType = delta.computeCompatibilityType();
-        if (detectedCompatibilityType.compareTo(expectedCompatibilityType) > 0) {
-            fail(delta, "Current codebase is not backward compatible ("+this.compatibilityType+") with version <"+previous+">. Compatibility type has been detected as <"+detectedCompatibilityType+">");
+        if (this.strictChecking) {
+            if (detectedCompatibilityType != expectedCompatibilityType) {
+                fail(delta, "Current codebase is not strictly backward compatible ("+this.compatibilityType+") with version <"+previous+">. Compatibility type has been detected as <"+detectedCompatibilityType+">");
+            }
+        } else {
+            if (expectedCompatibilityType == Delta.CompatibilityType.NON_BACKWARD_COMPATIBLE) {
+                helper.getLog().warn("Rule will never fail as compatibility type "+Delta.CompatibilityType.NON_BACKWARD_COMPATIBLE+" is used with non-strict checking.");
+            }
+
+            if (detectedCompatibilityType.compareTo(expectedCompatibilityType) > 0) {
+                fail(delta, "Current codebase is not backward compatible ("+this.compatibilityType+") with version <"+previous+">. Compatibility type has been detected as <"+detectedCompatibilityType+">");
+            }
         }
     }
 

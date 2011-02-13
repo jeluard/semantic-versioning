@@ -151,13 +151,13 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             final Comparer comparer = new Comparer(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
             final Delta delta = comparer.diff();
 
-            enforce(delta, previous, current);
+            enforce(helper, delta, previous, current);
         } catch (IOException e) {
             throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);
         }
     }
 
-    protected abstract void enforce(final Delta delta, final Version previous, final Version current) throws EnforcerRuleException;
+    protected abstract void enforce(final EnforcerRuleHelper helper, final Delta delta, final Version previous, final Version current) throws EnforcerRuleException;
     
     protected final void fail(final Delta delta, final String message) throws EnforcerRuleException {
         if (this.dumpDetails) {

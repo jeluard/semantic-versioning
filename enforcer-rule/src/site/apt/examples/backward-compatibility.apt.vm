@@ -21,7 +21,7 @@ Checking a project's compatibility against older releases
 * Basic example
 
   In order to check your project's compatibility against an older release, you must add the enforcer rule as a dependency to
-  the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule.
+  the maven-enforcer-plugin and then configure your the maven-enforcer-plugin to run the rule. Rule will succeed if specified compatibility type is compatible with specified one (less permissive compatibility types will be accepted).
 
   By default current artifact will be checked against most recently released version (retrieved from either local or one of configured remote repositories). Setting dumpDetails to true will output differences to standard output.
 
@@ -294,6 +294,62 @@ Checking a project's compatibility against older releases
           </execution>
           ...
         </executions>            
+        ...
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+---
+* Strict checking against a specific released version
+
+  You can stricly check your project (backward compatibility type MUST match specified one) against a specific released version:
+
+---
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      ...
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        ...
+        <dependencies>
+            ...
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            ...
+        </dependencies>
+        ...
+        <executions>
+           ....
+          <execution>
+            <id>check-version</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
+                  ...
+                  <compatibilityType>NON_BACKWARD_COMPATIBLE</compatibilityType>
+                  <strictChecking>true</strictChecking>
+                  <previousVersion>1.0.0</previousVersion>
+                  ...
+                </requireBackwardCompatibility>
+              </rules>
+            </configuration>
+          </execution>
+          ...
+        </executions>
         ...
       </plugin>
       ...
