@@ -15,7 +15,7 @@
 -docencoding
 'UTF-8'
 -doctitle
-'API 0.9.7 API'
+'API 0.9.8 API'
 -link
 'http://java.sun.com/javase/6/docs/api'
 -linkoffline
@@ -23,4 +23,4 @@
 -use
 -version
 -windowtitle
-'API 0.9.7 API'
+'API 0.9.8 API'
