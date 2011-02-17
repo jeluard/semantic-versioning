@@ -1,4 +1,3 @@
-Semantic Versioning is a Java library allowing to automatically validate if your project's version number follows Semantic Versioning principles.
-http://stillmaintained.com/jeluard/semantic-versioning.png
+Semantic Versioning is a Java library allowing to automatically validate if your project's version number follows Semantic Versioning principles. !http://stillmaintained.com/jeluard/semantic-versioning.png!
 
 Full documentation available at http://jeluard.github.com/semantic-versioning
