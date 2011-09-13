@@ -3,7 +3,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>enforcer-rule</artifactId>
-    <packaging>jar</packaging>
 
     <name>Enforcer Rule</name>
 
@@ -15,15 +14,15 @@
     </parent>
 
     <properties>
-        <api.version>1.0-beta-1</api.version>
-        <maven.version>2.0.9</maven.version>
+        <api.version>1.0.1</api.version>
+        <maven.version>2.2.1</maven.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.semver</groupId>
             <artifactId>api</artifactId>
-            <version>0.9.9-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.enforcer</groupId>
@@ -53,7 +52,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
+            <version>4.9</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

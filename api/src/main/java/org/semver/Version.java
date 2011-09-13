@@ -40,8 +40,9 @@ public final class Version implements Comparable<Version> {
         MAJOR, MINOR, PATCH, SPECIAL;
     }
 
-    private static final String FORMAT = "(\\d)\\.(\\d)\\.(\\d)([A-Za-z][0-9A-Za-z-]*)?";
+    private static final String FORMAT = "(\\d)\\.(\\d)\\.(\\d)(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
+    private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
 
     private final int major;
     private final int minor;
@@ -116,6 +117,10 @@ public final class Version implements Comparable<Version> {
 
     public boolean isStable() {
         return !isInDevelopment();
+    }
+
+    public boolean isSnapshot() {
+        return this.special.endsWith(Version.SNAPSHOT_VERSION_SUFFIX);
     }
 
     @Override

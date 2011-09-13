@@ -52,7 +52,6 @@ import org.semver.Version;
  */
 public abstract class AbstractEnforcerRule implements EnforcerRule {
 
-    private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
     private static final String JAR_ARTIFACT_TYPE = "jar";
     
     /**
@@ -99,8 +98,8 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             throw new EnforcerRuleException("Failed to access ${project} variable", e);
         }
         final String type = project.getArtifact().getType();
-        if (!JAR_ARTIFACT_TYPE.equals(type)) {
-            helper.getLog().debug("Skipping non "+JAR_ARTIFACT_TYPE+" artifact.");
+        if (!AbstractEnforcerRule.JAR_ARTIFACT_TYPE.equals(type)) {
+            helper.getLog().debug("Skipping non "+AbstractEnforcerRule.JAR_ARTIFACT_TYPE+" artifact.");
             return;
         }
             
@@ -139,9 +138,9 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             throw new EnforcerRuleException("Exception while accessing artifacts", e);
         }     
             
-        final Version previous = Version.parse(getVersion(previousArtifact));
+        final Version previous = Version.parse(previousArtifact.getVersion());
         final File previousJar = previousArtifact.getFile();
-        final Version current = Version.parse(getVersion(currentArtifact));
+        final Version current = Version.parse(currentArtifact.getVersion());
         final File currentJar = currentArtifact.getFile();
 
         helper.getLog().info("Using <"+previousJar+"> as previous JAR");
@@ -166,22 +165,6 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         throw new EnforcerRuleException(message);
     }
     
-    protected final String getVersion(final Artifact artifact) {
-        final String version = artifact.getVersion();
-        if (version.contains(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX)) {
-            return version.substring(0, version.indexOf(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX));
-        }
-        return version;
-    }
-    
-    /**
-     * @param artifactVersion
-     * @return true if specified version is a snapshot version
-     */
-    protected final boolean isSnapshotVersion(final ArtifactVersion artifactVersion) {
-        return artifactVersion.toString().endsWith(AbstractEnforcerRule.SNAPSHOT_VERSION_SUFFIX);
-    }
-    
     /**
      * @param artifactMetadataSource
      * @param project
@@ -194,10 +177,11 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         availableVersions.remove(new DefaultArtifactVersion(project.getArtifact().getVersion()));
         for (final Iterator<ArtifactVersion> iterator = availableVersions.iterator(); iterator.hasNext();) {
             final ArtifactVersion artifactVersion = iterator.next();
-            if (isSnapshotVersion(artifactVersion)) {
+            if (Version.parse(artifactVersion.toString()).isSnapshot()) {
                 iterator.remove();
             }
         }
+        //TODO proper sorting based on Version
         Collections.sort(availableVersions);
         Collections.reverse(availableVersions);
         return availableVersions;

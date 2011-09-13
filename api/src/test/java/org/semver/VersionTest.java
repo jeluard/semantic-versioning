@@ -46,6 +46,10 @@ public class VersionTest {
     public void shouldValidVersionBeParsed() {
         Version.parse("1.2.3");
         Version.parse("1.2.3beta");
+        Version.parse("1.2.3.DEV");
+        Version.parse("1.2.3.DEV-SNAPSHOT");
+        Version.parse("1.2.3-SNAPSHOT");
+        Version.parse("1.2.3-RC-SNAPSHOT");
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -60,16 +64,11 @@ public class VersionTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldInvalidVersion3NotBeParsed() {
-        Version.parse("1.2.3.beta");
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void shouldInvalidVersion4NotBeParsed() {
         Version.parse("1.2");
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void shouldInvalidVersion5NotBeParsed() {
+    public void shouldInvalidVersion4NotBeParsed() {
         Version.parse("a.2.3");
     }
 
