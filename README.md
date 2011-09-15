@@ -37,11 +37,11 @@ BACKWARD_COMPATIBLE_IMPLEMENTER
 ## Infer
 
 Infer JAR version based on a previously versioned JAR.
-`
+
 ```
 % java -jar semver.jar previousVersion previousJar currentJar (includes) (excludes)
 1.0.0
-``
+```
 
 ## Validate
 
