@@ -32,7 +32,7 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class Version implements Comparable<Version> {
-    
+
     /**
      * {@link Version} element. From most meaningful to less meaningful.
      */
@@ -40,7 +40,7 @@ public final class Version implements Comparable<Version> {
         MAJOR, MINOR, PATCH, SPECIAL;
     }
 
-    private static final String FORMAT = "(\\d)\\.(\\d)(?:\\.)?(\\d)?(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
+    private static final String FORMAT = "(\\d)+\\.(\\d)+(?:\\.)?(\\d)*(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";

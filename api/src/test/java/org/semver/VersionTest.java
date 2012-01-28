@@ -46,9 +46,11 @@ public class VersionTest {
     public void shouldValidVersionBeParsed() {
         Version.parse("1.2");
         Version.parse("1.2.3");
+        Version.parse("10.20.30");
         Version.parse("1.2.3beta");
         Version.parse("1.2.3.DEV");
         Version.parse("1.2.3.DEV-SNAPSHOT");
+        Version.parse("1.2-SNAPSHOT");
         Version.parse("1.2.3-SNAPSHOT");
         Version.parse("1.2.3-RC-SNAPSHOT");
         Version.parse("1.2-RC-SNAPSHOT");
