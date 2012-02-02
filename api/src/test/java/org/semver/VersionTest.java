@@ -100,15 +100,15 @@ public class VersionTest {
 
     @Test
     public void isNewer() {
-        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("0.0.0")) < 0);
-        Assert.assertTrue(Version.parse("0.0.0").compareTo(Version.parse("1.0.0")) > 0);
-        Assert.assertTrue(Version.parse("1.1.0").compareTo(Version.parse("1.0.0")) < 0);
-        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.1.0")) > 0);
-        Assert.assertTrue(Version.parse("1.0.1").compareTo(Version.parse("1.0.0")) < 0);
-        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.0.1")) > 0);
-        Assert.assertTrue(Version.parse("1.0.0Beta").compareTo(Version.parse("1.0.0Alpha")) < 0);
-        Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.0")) < 0);
-        Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.1")) < 0);
+        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("0.0.0")) > 0);
+        Assert.assertTrue(Version.parse("0.0.0").compareTo(Version.parse("1.0.0")) < 0);
+        Assert.assertTrue(Version.parse("1.1.0").compareTo(Version.parse("1.0.0")) > 0);
+        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.1.0")) < 0);
+        Assert.assertTrue(Version.parse("1.0.1").compareTo(Version.parse("1.0.0")) > 0);
+        Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("1.0.1")) < 0);
+        Assert.assertTrue(Version.parse("1.0.0Beta").compareTo(Version.parse("1.0.0Alpha")) > 0);
+        Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.0")) > 0);
+        Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.1")) > 0);
     }
 
     @Test

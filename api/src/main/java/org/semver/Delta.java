@@ -213,7 +213,7 @@ public final class Delta {
         if (current == null) {
             throw new IllegalArgumentException("null current");
         }
-        if (previous.compareTo(current) <= 0) {
+        if (current.compareTo(previous) <= 0) {
             throw new IllegalArgumentException("Current version <"+previous+"> must be more recent than previous version <"+current+">.");
         }
         //When in development public API is not considered stable
@@ -223,7 +223,7 @@ public final class Delta {
 
         //Current version must be superior or equals to inferred version
         final Version inferredVersion = infer(previous);
-        return inferredVersion.compareTo(current) >= 0;
+        return current.compareTo(inferredVersion) >= 0;
     }
     
 }

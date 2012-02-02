@@ -24,6 +24,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -159,20 +160,24 @@ public final class Version implements Comparable<Version> {
             return 0;
         }
 
-        if (other.major > this.major) {
-            return 1;
-        } else if (other.major == this.major) {
-            if (other.minor > this.minor) {
-                return 1;
-            } else if (other.minor == this.minor) {
-                if (other.patch > this.patch) {
-                    return 1;
+        if (this.major < other.major) {
+            return -1;
+        } else if (this.major == other.major) {
+            if (this.minor < other.minor) {
+                return -1;
+            } else if (this.minor == other.minor) {
+                if (this.patch < other.patch) {
+                    return -1;
+                } else if (this.special != null && other.special != null) {
+                    return this.special.compareTo(other.special);
                 } else if (other.special != null) {
-                    return other.special.compareTo(this.special);
-                }
+                    return -1;
+                } else if (this.special != null) {
+                    return 1;
+                } // else handled by previous equals check
             }
         }
-        return -1;
+        return 1;
     }
 
     @Override
