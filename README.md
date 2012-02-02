@@ -8,7 +8,7 @@ Semantic Versioning can check JAR files to identify breaking changes between ver
 # CLI
 
 This simple command line tool looks at Java JAR files and determine API changes.
-You might download self contained JAR file from [github](https://github.com/downloads/jeluard/semantic-versioning/semver-0.9.10.jar).
+You might download self contained JAR file from [github](https://github.com/downloads/jeluard/semantic-versioning/semver-0.9.12.jar).
 
 
 ## Diff
@@ -77,7 +77,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.10</version>
+                <version>0.9.12</version>
             </dependency>
             ...
         </dependencies>
@@ -133,7 +133,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.10</version>
+                <version>0.9.12</version>
             </dependency>
             ...
         </dependencies>
@@ -200,6 +200,6 @@ final boolean compatible = delta.validate(previous, current);
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.10</version>
+    <version>0.9.12</version>
 </dependency>
 ```
