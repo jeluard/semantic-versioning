@@ -24,6 +24,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -40,7 +41,7 @@ public final class Version implements Comparable<Version> {
         MAJOR, MINOR, PATCH, SPECIAL;
     }
 
-    private static final String FORMAT = "(\\d)+\\.(\\d)+(?:\\.)?(\\d)*(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
+    private static final String FORMAT = "(\\d+)\\.(\\d+)(?:\\.)?(\\d*)(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
@@ -88,7 +89,7 @@ public final class Version implements Comparable<Version> {
         final int minor = Integer.valueOf(matcher.group(2));
         final int patch;
         final String patchMatch = matcher.group(3);
-        if (patchMatch != null) {
+        if (StringUtils.isNotEmpty(patchMatch)) {
            patch = Integer.valueOf(patchMatch);
         } else {
             patch = 0;

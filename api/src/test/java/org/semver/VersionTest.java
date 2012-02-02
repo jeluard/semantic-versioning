@@ -72,6 +72,21 @@ public class VersionTest {
     }
 
     @Test
+    public void shouldMajorBeCorrectlyIncremented() {
+        Assert.assertEquals(Version.parse("10.0.0"), Version.parse("9.0.0").next(Version.Element.MAJOR));
+    }
+
+    @Test
+    public void shouldMinorBeCorrectlyIncremented() {
+        Assert.assertEquals(Version.parse("0.10.0"), Version.parse("0.9.0").next(Version.Element.MINOR));
+    }
+
+    @Test
+    public void shouldPatchBeCorrectlyIncremented() {
+        Assert.assertEquals(Version.parse("0.0.10"), Version.parse("0.0.9").next(Version.Element.PATCH));
+    }
+
+    @Test
     public void shouldDevelopmentBeInDevelopment() {
         Assert.assertTrue(Version.parse("0.1.1").isInDevelopment());
         Assert.assertFalse(Version.parse("1.1.1").isInDevelopment());
