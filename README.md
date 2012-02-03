@@ -112,6 +112,20 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
 
 Once you have configured your project, maven-enforcer will be able to throw a build error if current version is not backward compatible with last released one. 
 
+You can force strict checking (i.e. compatibility type must exactly match specified one):
+
+```xml
+<configuration>
+  <rules>
+    <requireBackwardCompatibility implementation="org.semver.enforcer.RequireBackwardCompatibility">
+      ...
+      <strictChecking>true</strictChecking>
+      ...
+    </requireBackwardCompatibility>
+  </rules>
+</configuration>
+```
+
 ## Checking a project's version
 
 In order to check your project's version, you must add the enforcer rule as a dependency to
@@ -165,6 +179,57 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
 ```
 
 Once you have configured your project, maven-enforcer will be able to throw a build error if current version follows semantic versioning principles. 
+
+## Dumping details
+
+Dump details of detected changes:
+
+```xml
+<configuration>
+  <rules>
+    <require...>
+      ...
+      <dumpDetails>true</dumpDetails>
+      ...
+    </require...>
+  </rules>
+</configuration>
+```
+
+## Checking against a wekk known version
+
+You can force check with a well known version:
+
+```xml
+<configuration>
+  <rules>
+    <require...>
+      ...
+      <previousVersion>1.0.0</previousVersion>
+      ...
+    </require...>
+  </rules>
+</configuration>
+```
+
+## Filtering
+
+Both rules allow to filter classes/packages:
+
+```xml
+<require...>
+  ...
+  <includes>
+    <include>org.project.MyClass</include>
+    <include>org.project.internal</include>
+  </includes>
+  <excludes>
+    <exclude>org.project.MyClass</exclude>
+    <exclude>org.project.internal</exclude>
+  </excludes>
+  ...
+</require...>
+```
 
 # API overview
 
