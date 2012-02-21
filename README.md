@@ -1,4 +1,7 @@
-Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning). ![StillMaintained](http://stillmaintained.com/jeluard/semantic-versioning.png)
+![StillMaintained](http://stillmaintained.com/jeluard/semantic-versioning.png)
+![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
+
+Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
 
 Project version number changes implication are not always clearly identified. Will this patch released be safe to use in my project? 
 Does this minor version increment implies my implementation of some API is no more complete? 
