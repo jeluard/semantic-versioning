@@ -135,7 +135,9 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             validateArtifact(previousArtifact);
             validateArtifact(currentArtifact);
         } catch (Exception e) {
-            throw new EnforcerRuleException("Exception while accessing artifacts", e);
+            helper.getLog().warn("Exception while accessing artifacts; skipping check.", e);
+            return;
+            //throw new EnforcerRuleException("Exception while accessing artifacts", e);
         }     
             
         final Version previous = Version.parse(previousArtifact.getVersion());
