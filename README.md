@@ -1,5 +1,3 @@
-![StillMaintained](http://stillmaintained.com/jeluard/semantic-versioning.png)
-<br>
 ![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
 
 Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
