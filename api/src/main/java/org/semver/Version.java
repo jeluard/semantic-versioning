@@ -97,7 +97,9 @@ public final class Version implements Comparable<Version> {
         } else {
             patch = 0;
         }
-        return new Version(major, minor, patch, matcher.group(4), matcher.group(5));
+        final String separator = matcher.group(4);
+        final String special = matcher.group(5);
+        return new Version(major, minor, patch, separator, "".equals(special) ? null : special);
     }
     
     /**

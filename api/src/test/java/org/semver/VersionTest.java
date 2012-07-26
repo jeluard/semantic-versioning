@@ -63,11 +63,6 @@ public class VersionTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldInvalidVersion2NotBeParsed() {
-        Version.parse("1.2.3.4");
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void shouldInvalidVersion3NotBeParsed() {
         Version.parse("a.2.3");
     }
 
