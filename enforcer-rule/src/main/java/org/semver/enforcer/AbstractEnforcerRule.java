@@ -20,6 +20,7 @@ package org.semver.enforcer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,9 +47,7 @@ import org.semver.Dumper;
 import org.semver.Version;
 
 /**
- * 
  * Abstract {@link EnforcerRule} implementation providing facilities for compatibility checking.
- * 
  */
 public abstract class AbstractEnforcerRule implements EnforcerRule {
 
@@ -102,9 +101,12 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             helper.getLog().debug("Skipping non "+AbstractEnforcerRule.JAR_ARTIFACT_TYPE+" artifact.");
             return;
         }
-            
+
         final Artifact previousArtifact;
-        final Artifact currentArtifact;
+        final Artifact currentArtifact = project.getArtifact();
+        validateArtifact(currentArtifact);
+        final Version current = Version.parse(currentArtifact.getVersion());
+        final File currentJar = currentArtifact.getFile();
         try {
             final ArtifactRepository localRepository = (ArtifactRepository) helper.evaluate("${localRepository}");
             final String version;
@@ -115,35 +117,32 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             } else {                
                 final ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) helper.getComponent(ArtifactMetadataSource.class);
                 final List<ArtifactVersion> availableVersions = getAvailableReleasedVersions(artifactMetadataSource, project, localRepository);
+                final List<ArtifactVersion> availablePreviousVersions = filterNonPreviousVersions(availableVersions, current);
                 
-                if (availableVersions.isEmpty()) {
+                if (availablePreviousVersions.isEmpty()) {
                     helper.getLog().warn("No previously released version. Backward compatibility check not performed.");
                     
                     return;
                 }
 
-                version = availableVersions.iterator().next().toString();
+                version = availablePreviousVersions.iterator().next().toString();
                 
-                helper.getLog().info("Version deduced as <"+version+"> (among all availables: "+availableVersions+")");
+                helper.getLog().info("Version deduced as <"+version+"> (among all availables: "+availablePreviousVersions+")");
             }
+            
             final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
             previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), version, null, type);
             final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             resolver.resolve(previousArtifact, project.getRemoteArtifactRepositories(), localRepository);
-            currentArtifact = project.getArtifact();
-            
+
             validateArtifact(previousArtifact);
-            validateArtifact(currentArtifact);
         } catch (Exception e) {
             helper.getLog().warn("Exception while accessing artifacts; skipping check.", e);
             return;
-            //throw new EnforcerRuleException("Exception while accessing artifacts", e);
         }     
-            
+
         final Version previous = Version.parse(previousArtifact.getVersion());
         final File previousJar = previousArtifact.getFile();
-        final Version current = Version.parse(currentArtifact.getVersion());
-        final File currentJar = currentArtifact.getFile();
 
         helper.getLog().info("Using <"+previousJar+"> as previous JAR");
         helper.getLog().info("Using <"+currentJar+"> as current JAR");
@@ -188,7 +187,17 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         Collections.reverse(availableVersions);
         return availableVersions;
     }
-    
+
+    protected final List<ArtifactVersion> filterNonPreviousVersions(final List<ArtifactVersion> availableVersions, final Version version) {
+        final List<ArtifactVersion> versions = new ArrayList<ArtifactVersion>();
+        for (final ArtifactVersion artifactVersion : versions) {
+            if (version.compareTo(Version.parse(artifactVersion.toString())) > 0) {
+                versions.add(artifactVersion);
+            }
+        }
+        return versions;
+    }
+
     /**
      * Validates that specified {@link Artifact} is a file.
      * @param artifact
