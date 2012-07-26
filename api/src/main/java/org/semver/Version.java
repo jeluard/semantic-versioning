@@ -42,7 +42,7 @@ public final class Version implements Comparable<Version> {
         MAJOR, MINOR, PATCH, SPECIAL;
     }
 
-    private static final String FORMAT = "(\\d+)\\.(\\d+)(?:\\.)?(\\d*)(?:\\.|-)?([A-Za-z][0-9A-Za-z-]*)?";
+    private static final String FORMAT = "(\\d+)\\.(\\d+)(?:\\.)?(\\d*)(\\.|-|\\+)?([0-9A-Za-z-.]*)?";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
@@ -50,13 +50,14 @@ public final class Version implements Comparable<Version> {
     private final int major;
     private final int minor;
     private final int patch;
+    private final String separator;
     private final String special;
 
     public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch) {
-        this(major, minor, patch, null);
+        this(major, minor, patch, null, null);
     }
 
-    public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch, @Nullable final String special) {
+    public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch, @Nullable final String separator, @Nullable final String special) {
         if (major < 0) {
             throw new IllegalArgumentException(Element.MAJOR+" must be positive");
         }
@@ -70,6 +71,7 @@ public final class Version implements Comparable<Version> {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
+        this.separator = separator;
         this.special = special;
     }
 
@@ -95,7 +97,7 @@ public final class Version implements Comparable<Version> {
         } else {
             patch = 0;
         }
-        return new Version(major, minor, patch, matcher.group(4));
+        return new Version(major, minor, patch, matcher.group(4), matcher.group(5));
     }
     
     /**
@@ -184,6 +186,9 @@ public final class Version implements Comparable<Version> {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append(this.major).append(".").append(this.minor).append(".").append(this.patch);
+        if (this.separator != null) {
+            builder.append(this.separator);
+        }
         if (this.special != null) {
             builder.append(this.special);
         }
