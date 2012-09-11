@@ -190,7 +190,7 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
 
     protected final List<ArtifactVersion> filterNonPreviousVersions(final List<ArtifactVersion> availableVersions, final Version version) {
         final List<ArtifactVersion> versions = new ArrayList<ArtifactVersion>();
-        for (final ArtifactVersion artifactVersion : versions) {
+        for (final ArtifactVersion artifactVersion : availableVersions) {
             if (version.compareTo(Version.parse(artifactVersion.toString())) > 0) {
                 versions.add(artifactVersion);
             }
