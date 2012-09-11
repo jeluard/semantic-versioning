@@ -198,7 +198,7 @@ Dump details of detected changes:
 </configuration>
 ```
 
-## Checking against a wekk known version
+## Checking against a well known version
 
 You can force check with a well known version:
 
