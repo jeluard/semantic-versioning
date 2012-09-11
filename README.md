@@ -267,6 +267,6 @@ final boolean compatible = delta.validate(previous, current);
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.12</version>
+    <version>0.9.14</version>
 </dependency>
 ```
