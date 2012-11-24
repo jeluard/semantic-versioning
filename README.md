@@ -1,5 +1,3 @@
-![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
-
 Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
 
 Project version number changes implication are not always clearly identified. Will this patch released be safe to use in my project? 
@@ -7,18 +5,49 @@ Does this minor version increment implies my implementation of some API is no mo
   
 Semantic Versioning can check JAR files to identify breaking changes between versions and identify if your version number is correct according to Semantic Versioning principles.
 
+# About this Fork
+
+This fork contains the following changes:
+
+* Build with newer version of ASM to support Scala class files.
+* Better commandline interface based on [CmdOption toolkit](http://cmdoption.tototec.de).
+
 # CLI
 
 This simple command line tool looks at Java JAR files and determine API changes.
-You might download self contained JAR file from [github](https://github.com/downloads/jeluard/semantic-versioning/semver-0.9.15.jar).
 
+## Built-in help
+
+```
+% java -jar semver.jar --help
+Semantic Version validator version 0.9.16-SNAPSHOT.
+
+Usage: semver [options]
+
+Options:
+  --base-jar JAR          The base jar.
+  --base-version VERSION  Version of the base jar (given with --base-jar).
+  --check,-c              Check the compatibility of two jars.
+  --diff,-d               Show the differences between two jars.
+  --excludes EXCLUDE;...  Semicolon separated list of full qualified class names
+                          to be excluded.
+  --help,-h               Show this help and exit.
+  --includes INCLUDE;...  Semicolon separated list of full qualified class names
+                          to be included.
+  --infer,-i              Infer the version of the new jar based on the previous
+                          jar.
+  --new-jar JAR           The new jar.
+  --new-version VERSION   Version of the new jar (given with --new-jar).
+  --validate,-v           Validate that the versions of two jars fulfil the
+                          semver specification.
+```
 
 ## Diff
 
 Dump all changes between two JARs on standard output.
 
 ```
-% java -jar semver.jar previousJar currentJar (includes) (excludes)
+% java -jar semver.jar --diff --base-jar previousJar --new-jar current.jar
 Class org.project.MyClass
  Added Class 
 Class org.project.MyClass2
@@ -32,7 +61,7 @@ Class org.project.MyClass2
 Check compatibility type between two JARs.
 
 ```
-% java -jar semver.jar previousJar currentJar (includes) (excludes)
+% java -jar semver.jar --check --base-jar previousJar --new-jar current.jar
 BACKWARD_COMPATIBLE_IMPLEMENTER
 ```
 
@@ -41,8 +70,8 @@ BACKWARD_COMPATIBLE_IMPLEMENTER
 Infer JAR version based on a previously versioned JAR.
 
 ```
-% java -jar semver.jar previousVersion previousJar currentJar (includes) (excludes)
-1.0.0
+% java -jar semver.jar --infer --base-version 1.0.0 --base-jar previous.jar --new-jar current.jar
+1.0.1
 ```
 
 ## Validate
@@ -50,7 +79,7 @@ Infer JAR version based on a previously versioned JAR.
 Validate JAR version based on a previously versioned JAR.
 
 ```
-% java -jar semver.jar previousVersion previousJar currentVersion currentJar (includes) (excludes)
+% java -jar semver.jar --validate --base-version 1.0.0 --base-jar previous.jar --new-version 1.0.1 --new-jar current.jar
 true
 ```
 
