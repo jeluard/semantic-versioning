@@ -90,6 +90,8 @@ public class Main {
     public static void main(final String[] args) throws IOException {
         Config config = new Config();
         CmdlineParser cmdlineParser = new CmdlineParser(config);
+        // Load translations of command line descriptions
+        cmdlineParser.setResourceBundle(Main.class.getPackage().getName() + ".Messages", Main.class.getClassLoader());
         cmdlineParser.setProgramName("semver");
         cmdlineParser.setAboutLine("Semantic Version validator version 0.9.16-SNAPSHOT.");
         try {
@@ -125,5 +127,4 @@ public class Main {
         }
 
     }
-
 }
