@@ -21,7 +21,10 @@ package org.semver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import de.tototec.cmdoption.CmdOption;
@@ -35,91 +38,92 @@ import de.tototec.cmdoption.CmdlineParserException;
  */
 public class Main {
 
-	static class Config {
-		@CmdOption(names = { "--help", "-h" }, description = "Show this help and exit.", isHelp = true)
-		boolean help;
+    static class Config {
+        @CmdOption(names = { "--help", "-h" }, description = "Show this help and exit.", isHelp = true)
+        boolean help;
 
-		@CmdOption(names = { "--diff", "-d" }, conflictsWith = { "--check", "--infer", "--validate" })
-		public boolean diff;
+        @CmdOption(names = { "--diff", "-d" }, conflictsWith = { "--check", "--infer", "--validate" }, description = "Show the differences between two jars.")
+        public boolean diff;
 
-		@CmdOption(names = { "--check", "-c" }, conflictsWith = { "--diff", "--infer", "--validate" })
-		public boolean check;
+        @CmdOption(names = { "--check", "-c" }, conflictsWith = { "--diff", "--infer", "--validate" }, description = "Check the compatibility of two jars.")
+        public boolean check;
 
-		@CmdOption(names = { "--infer", "-i" }, requires = { "--base-version" }, conflictsWith = { "--diff", "--check",
-				"--validate" })
-		public boolean infer;
+        @CmdOption(names = { "--infer", "-i" }, requires = { "--base-version" }, conflictsWith = { "--diff", "--check",
+                "--validate" }, description = "Infer the version of the new jar based on the previous jar.")
+        public boolean infer;
 
-		@CmdOption(names = { "--validate", "-v" }, requires = { "--base-version", "--new-version" }, conflictsWith = {
-				"--diff", "--check", "--infer" })
-		public boolean validate;
+        @CmdOption(names = { "--validate", "-v" }, requires = { "--base-version", "--new-version" }, conflictsWith = {
+                "--diff", "--check", "--infer" }, description = "Validate that the versions of two jars fulfil the semver specification.")
+        public boolean validate;
 
-		@CmdOption(names = { "--base-jar" }, args = { "JAR" }, minCount = 1, description = "The base jar.")
-		public String baseJar;
+        @CmdOption(names = { "--base-jar" }, args = { "JAR" }, minCount = 1, description = "The base jar.")
+        public String baseJar;
 
-		@CmdOption(names = { "--new-jar" }, args = { "JAR" }, minCount = 1, description = "The new jar.")
-		public String newJar;
+        @CmdOption(names = { "--new-jar" }, args = { "JAR" }, minCount = 1, description = "The new jar.")
+        public String newJar;
 
-		final Set<String> includes = new LinkedHashSet<String>();
+        final Set<String> includes = new LinkedHashSet<String>();
 
-		@CmdOption(names = { "--includes" }, args = { "INCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be included.")
-		public void setIncludes(String includes) {
-			if (includes != null) {
-				this.includes.addAll(Arrays.asList(includes.split(";")));
-			}
-		}
+        @CmdOption(names = { "--includes" }, args = { "INCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be included.")
+        public void setIncludes(String includes) {
+            if (includes != null) {
+                this.includes.addAll(Arrays.asList(includes.split(";")));
+            }
+        }
 
-		final Set<String> excludes = new LinkedHashSet<String>();
+        final Set<String> excludes = new LinkedHashSet<String>();
 
-		@CmdOption(names = { "--excludes" }, args = { "EXCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be excluded.")
-		public void setExcludes(String excludes) {
-			if (excludes != null) {
-				this.excludes.addAll(Arrays.asList(excludes.split(";")));
-			}
-		}
+        @CmdOption(names = { "--excludes" }, args = { "EXCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be excluded.")
+        public void setExcludes(String excludes) {
+            if (excludes != null) {
+                this.excludes.addAll(Arrays.asList(excludes.split(";")));
+            }
+        }
 
-		@CmdOption(names = { "--base-version" }, args = { "VERSION" })
-		public String baseVersion;
+        @CmdOption(names = { "--base-version" }, args = { "VERSION" }, description = "Version of the base jar (given with --base-jar).")
+        public String baseVersion;
 
-		@CmdOption(names = { "--new-version" }, args = { "VERSION" })
-		public String newVersion;
-	}
+        @CmdOption(names = { "--new-version" }, args = { "VERSION" }, description = "Version of the new jar (given with --new-jar).")
+        public String newVersion;
+    }
 
-	public static void main(final String[] args) throws IOException {
-		Config config = new Config();
-		CmdlineParser cmdlineParser = new CmdlineParser(config);
-		cmdlineParser.setProgramName("semver");
-		try {
-			cmdlineParser.parse(args);
-		} catch (CmdlineParserException e) {
-			System.err.println("Error: " + e.getMessage() + "\nRun semver --help for help.");
-			System.exit(1);
-		}
+    public static void main(final String[] args) throws IOException {
+        Config config = new Config();
+        CmdlineParser cmdlineParser = new CmdlineParser(config);
+        cmdlineParser.setProgramName("semver");
+        cmdlineParser.setAboutLine("Semantic Version validator version 0.9.16-SNAPSHOT.");
+        try {
+            cmdlineParser.parse(args);
+        } catch (CmdlineParserException e) {
+            System.err.println("Error: " + e.getLocalizedMessage() + "\nRun semver --help for help.");
+            System.exit(1);
+        }
 
-		if (config.help) {
-			cmdlineParser.usage();
-			System.exit(0);
-		}
+        if (config.help) {
+            cmdlineParser.usage();
+            System.exit(0);
+        }
 
-		final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.baseJar), config.includes,
-				config.excludes);
-		final Delta delta = comparer.diff();
+        final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.baseJar), config.includes,
+                config.excludes);
+        final Delta delta = comparer.diff();
 
-		if (config.diff) {
-			Dumper.dump(delta);
-		}
+        if (config.diff) {
+            Dumper.dump(delta);
+        }
 
-		if (config.check) {
-			System.out.println(delta.computeCompatibilityType());
-		}
+        if (config.check) {
+            System.out.println(delta.computeCompatibilityType());
+        }
 
-		if (config.infer) {
-			System.out.println(delta.infer(Version.parse(config.baseVersion)));
-		}
+        if (config.infer) {
+            System.out.println(delta.infer(Version.parse(config.baseVersion)));
+        }
 
-		if (config.validate) {
-			System.out.println(delta.validate(Version.parse(config.baseVersion), Version.parse(config.newVersion)));
-		}
+        if (config.validate) {
+            System.out.println(delta.validate(Version.parse(config.baseVersion), Version.parse(config.newVersion)));
+        }
 
-	}
+    }
 
 }
