@@ -21,10 +21,7 @@ package org.semver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import de.tototec.cmdoption.CmdOption;
