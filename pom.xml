@@ -1,136 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.semver</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.9.16-SNAPSHOT</version>
-    <packaging>pom</packaging>
+  <groupId>org.semver</groupId>
+  <artifactId>parent</artifactId>
+  <version>0.9.16-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <name>Semantic Versioning</name>
-    <inceptionYear>2010</inceptionYear>
-    <url>http://github.com/jeluard/semantic-versioning</url>
-    
-    <description>
-        A library to automatically validate if your project's version number follows Semantic Versioning principles
-    </description>
+  <name>Semantic Versioning</name>
+  <inceptionYear>2010</inceptionYear>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
+  <description>
+    A library to automatically validate if your project's version number follows Semantic Versioning principles
+  </description>
 
-    <modules>
-        <module>api</module>
-        <module>enforcer-rule</module>
-    </modules>
+  <parent>
+    <groupId>com.github.jeluard</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>2</version>
+  </parent>
 
-    <licenses>
-        <license>
-            <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+  <modules>
+    <module>api</module>
+    <module>enforcer-rule</module>
+  </modules>
 
-    <developers>
-        <developer>
-            <id>julien</id>
-            <name>Julien Eluard</name>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git@github.com:jeluard/semantic-versioning</connection>
-        <developerConnection>scm:git:git@github.com:jeluard/semantic-versioning</developerConnection>
-        <url>scm:git:git@github.com:jeluard/semantic-versioning</url>
-    </scm>
-
-    <issueManagement>
-        <system>Github</system>
-        <url>http://github.com/jeluard/semantic-versioning/issues</url>
-    </issueManagement>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
-                <version>1.10.b1</version>
-                <configuration>
-                    <header>LICENSE</header>
-                    <failIfMissing>true</failIfMissing>
-                    <aggregate>true</aggregate>
-                    <strictCheck>true</strictCheck>
-                    <excludes>
-                        <exclude>.gitignore</exclude>
-                        <exclude>README.textile</exclude>
-                        <exclude>LICENSE</exclude>
-                        <exclude>NOTICE</exclude>
-                        <exclude>licenses/*</exclude>
-                        <exclude>**/dependency-reduced-pom.xml</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-headers</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.2</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.2.2</version>
-                <configuration>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <preparationGoals>clean install</preparationGoals>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <scm>
+    <connection>scm:git:git@github.com:jeluard/semantic-versioning</connection>
+    <developerConnection>scm:git:git@github.com:jeluard/semantic-versioning</developerConnection>
+    <url>scm:git:git@github.com:jeluard/semantic-versioning</url>
+  </scm>
 
 </project>
