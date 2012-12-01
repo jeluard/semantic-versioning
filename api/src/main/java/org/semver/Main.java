@@ -90,7 +90,7 @@ public class Main {
         // Load translations of command line descriptions
         cmdlineParser.setResourceBundle(Main.class.getPackage().getName() + ".Messages", Main.class.getClassLoader());
         cmdlineParser.setProgramName("semver");
-        cmdlineParser.setAboutLine("Semantic Version validator version 0.9.16-SNAPSHOT.");
+        cmdlineParser.setAboutLine("Semantic Version validator.");
         try {
             cmdlineParser.parse(args);
         } catch (CmdlineParserException e) {
