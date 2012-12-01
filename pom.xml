@@ -31,4 +31,11 @@
     <url>scm:git:git@github.com:jeluard/semantic-versioning</url>
   </scm>
 
+  <developers>
+    <developer>
+      <id>lefou</id>
+      <name>Tobias Roeser</name>
+    </developer>
+  </developers>
+
 </project>

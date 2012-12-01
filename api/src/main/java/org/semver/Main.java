@@ -21,65 +21,107 @@ package org.semver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.tototec.cmdoption.CmdOption;
+import de.tototec.cmdoption.CmdlineParser;
+import de.tototec.cmdoption.CmdlineParserException;
+
 /**
- *
+ * 
  * CLI interface.
  * 
  */
 public class Main {
 
-    private static void failIfNotEnoughArguments(final String[] arguments, final int minimalSize, final String message) {
-        if (arguments.length < minimalSize) {
-            System.out.println(message);
-            System.exit(-1);
+    static class Config {
+        @CmdOption(names = { "--help", "-h" }, description = "Show this help and exit.", isHelp = true)
+        boolean help;
+
+        @CmdOption(names = { "--diff", "-d" }, conflictsWith = { "--check", "--infer", "--validate" }, description = "Show the differences between two jars.")
+        public boolean diff;
+
+        @CmdOption(names = { "--check", "-c" }, conflictsWith = { "--diff", "--infer", "--validate" }, description = "Check the compatibility of two jars.")
+        public boolean check;
+
+        @CmdOption(names = { "--infer", "-i" }, requires = { "--base-version" }, conflictsWith = { "--diff", "--check",
+                "--validate" }, description = "Infer the version of the new jar based on the previous jar.")
+        public boolean infer;
+
+        @CmdOption(names = { "--validate", "-v" }, requires = { "--base-version", "--new-version" }, conflictsWith = {
+                "--diff", "--check", "--infer" }, description = "Validate that the versions of two jars fulfil the semver specification.")
+        public boolean validate;
+
+        @CmdOption(names = { "--base-jar" }, args = { "JAR" }, minCount = 1, description = "The base jar.")
+        public String baseJar;
+
+        @CmdOption(names = { "--new-jar" }, args = { "JAR" }, minCount = 1, description = "The new jar.")
+        public String newJar;
+
+        final Set<String> includes = new LinkedHashSet<String>();
+
+        @CmdOption(names = { "--includes" }, args = { "INCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be included.")
+        public void setIncludes(String includes) {
+            if (includes != null) {
+                this.includes.addAll(Arrays.asList(includes.split(";")));
+            }
         }
+
+        final Set<String> excludes = new LinkedHashSet<String>();
+
+        @CmdOption(names = { "--excludes" }, args = { "EXCLUDE;..." }, description = "Semicolon separated list of full qualified class names to be excluded.")
+        public void setExcludes(String excludes) {
+            if (excludes != null) {
+                this.excludes.addAll(Arrays.asList(excludes.split(";")));
+            }
+        }
+
+        @CmdOption(names = { "--base-version" }, args = { "VERSION" }, description = "Version of the base jar (given with --base-jar).")
+        public String baseVersion;
+
+        @CmdOption(names = { "--new-version" }, args = { "VERSION" }, description = "Version of the new jar (given with --new-jar).")
+        public String newVersion;
     }
-    
-    private static final String DIFF_ACTION = "diff";
-    private static final String CHECK_ACTION = "check";
-    private static final String INFER_ACTION = "infer";
-    private static final String VALIDATE_ACTION = "validate";
-    
-    private static Set<String> extractFiltersIfAny(final String[] arguments, final int position) {
+
+    public static void main(final String[] args) throws IOException {
+        Config config = new Config();
+        CmdlineParser cmdlineParser = new CmdlineParser(config);
+        // Load translations of command line descriptions
+        cmdlineParser.setResourceBundle(Main.class.getPackage().getName() + ".Messages", Main.class.getClassLoader());
+        cmdlineParser.setProgramName("semver");
+        cmdlineParser.setAboutLine("Semantic Version validator version 0.9.16-SNAPSHOT.");
         try {
-            final String filters = arguments[position];
-            return new HashSet<String>(Arrays.asList(filters.split(";")));
-        } catch (IndexOutOfBoundsException e) {
-            return Collections.emptySet();
+            cmdlineParser.parse(args);
+        } catch (CmdlineParserException e) {
+            System.err.println("Error: " + e.getLocalizedMessage() + "\nRun semver --help for help.");
+            System.exit(1);
         }
-    }
-    
-    public static void main(final String[] arguments) throws IOException {
-        Main.failIfNotEnoughArguments(arguments, 3, "Usage: ["+DIFF_ACTION+"|"+CHECK_ACTION+"|"+INFER_ACTION+"|"+VALIDATE_ACTION+"] (previousVersion) previousJar (currentVersion) currentJar (includes) (excludes)");
 
-        final String action = arguments[0];
-        if (DIFF_ACTION.equals(action)) {
-            final Comparer comparer = new Comparer(new File(arguments[1]), new File(arguments[2]), extractFiltersIfAny(arguments, 3), extractFiltersIfAny(arguments, 4));
-            Dumper.dump(comparer.diff());
-        } else if (CHECK_ACTION.equals(action)) {   
-            final Comparer comparer = new Comparer(new File(arguments[1]), new File(arguments[2]), extractFiltersIfAny(arguments, 3), extractFiltersIfAny(arguments, 4));
-            final Delta delta = comparer.diff();
+        if (config.help) {
+            cmdlineParser.usage();
+            System.exit(0);
+        }
+
+        final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.baseJar), config.includes,
+                config.excludes);
+        final Delta delta = comparer.diff();
+
+        if (config.diff) {
+            Dumper.dump(delta);
+        }
+
+        if (config.check) {
             System.out.println(delta.computeCompatibilityType());
-        } else if (INFER_ACTION.equals(action)) {
-            Main.failIfNotEnoughArguments(arguments, 4, "Usage: "+INFER_ACTION+" previousVersion previousJar currentJar (includes) (excludes)");
-
-            final Comparer comparer = new Comparer(new File(arguments[2]), new File(arguments[3]), extractFiltersIfAny(arguments, 4), extractFiltersIfAny(arguments, 5));
-            final Delta delta = comparer.diff();
-            System.out.println(delta.infer(Version.parse(arguments[1])));
-        } else if (VALIDATE_ACTION.equals(action)) {
-            Main.failIfNotEnoughArguments(arguments, 5, "Usage: "+VALIDATE_ACTION+" previousVersion previousJar currentVersion currentJar (includes) (excludes)");
-            
-            final Comparer comparer = new Comparer(new File(arguments[2]), new File(arguments[4]), extractFiltersIfAny(arguments, 5), extractFiltersIfAny(arguments, 6));
-            final Delta delta = comparer.diff();
-            System.out.println(delta.validate(Version.parse(arguments[1]), Version.parse(arguments[3])));
-        } else {
-            System.out.println("First argument must be one of ["+DIFF_ACTION+"|"+CHECK_ACTION+"|"+INFER_ACTION+"|"+VALIDATE_ACTION+"]");
-            System.exit(-1);
         }
-    }
 
+        if (config.infer) {
+            System.out.println(delta.infer(Version.parse(config.baseVersion)));
+        }
+
+        if (config.validate) {
+            System.out.println(delta.validate(Version.parse(config.baseVersion), Version.parse(config.newVersion)));
+        }
+
+    }
 }
