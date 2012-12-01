@@ -299,3 +299,5 @@ final boolean compatible = delta.validate(previous, current);
     <version>0.9.15</version>
 </dependency>
 ```
+
+Released under [Apache 2 license](http://www.apache.org/licenses/LICENSE-2.0.html).
