@@ -20,7 +20,7 @@ This simple command line tool looks at Java JAR files and determine API changes.
 
 ```
 % java -jar semver.jar --help
-Semantic Version validator version 0.9.16-SNAPSHOT.
+Semantic Version validator.
 
 Usage: semver [options]
 
