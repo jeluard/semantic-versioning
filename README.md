@@ -22,7 +22,7 @@ This simple command line tool looks at Java JAR files and determine API changes.
 
 ```
 % java -jar semver.jar --help
-Semantic Version validator version 0.9.16-SNAPSHOT.
+Semantic Version validator.
 
 Usage: semver [options]
 
@@ -110,7 +110,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.15</version>
+                <version>0.9.16</version>
             </dependency>
             ...
         </dependencies>
@@ -298,7 +298,7 @@ final boolean compatible = delta.validate(previous, current);
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.15</version>
+    <version>0.9.16</version>
 </dependency>
 ```
 
