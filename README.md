@@ -7,13 +7,6 @@ Does this minor version increment implies my implementation of some API is no mo
   
 Semantic Versioning can check JAR files to identify breaking changes between versions and identify if your version number is correct according to Semantic Versioning principles.
 
-# About this Fork
-
-This fork contains the following changes:
-
-* Build with newer version of ASM to support Scala class files.
-* Better commandline interface based on [CmdOption toolkit](http://cmdoption.tototec.de).
-
 # CLI
 
 This simple command line tool looks at Java JAR files and determine API changes.
