@@ -170,16 +170,18 @@ public final class Version implements Comparable<Version> {
             } else if (this.minor == other.minor) {
                 if (this.patch < other.patch) {
                     return -1;
-                } else if (this.special != null && other.special != null) {
-                    return this.special.compareTo(other.special);
-                } else if (other.special != null) {
-                    return -1;
-                } else if (this.special != null) {
-                    return 1;
-                } // else handled by previous equals check
+                } else if (this.patch == other.patch) {
+                    if (this.special != null && other.special != null) {
+                        return this.special.compareTo(other.special);
+                    } else if (other.special != null) {
+                        return -1;
+                    } else if (this.special != null) {
+                       return 1;
+                    } // else handled by previous equals check
+                }
             }
         }
-        return 1;
+        return 1; //if this (major, minor or patch) is > than other
     }
 
     @Override

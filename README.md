@@ -1,16 +1,11 @@
+![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
+
 Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
 
 Project version number changes implication are not always clearly identified. Will this patch released be safe to use in my project? 
 Does this minor version increment implies my implementation of some API is no more complete? 
   
 Semantic Versioning can check JAR files to identify breaking changes between versions and identify if your version number is correct according to Semantic Versioning principles.
-
-# About this Fork
-
-This fork contains the following changes:
-
-* Build with newer version of ASM to support Scala class files.
-* Better commandline interface based on [CmdOption toolkit](http://cmdoption.tototec.de).
 
 # CLI
 
@@ -108,7 +103,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.15</version>
+                <version>0.9.16</version>
             </dependency>
             ...
         </dependencies>
@@ -296,7 +291,7 @@ final boolean compatible = delta.validate(previous, current);
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.15</version>
+    <version>0.9.16</version>
 </dependency>
 ```
 
