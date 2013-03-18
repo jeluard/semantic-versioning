@@ -3,7 +3,7 @@
 Version number changes implications are not always clearly identified. Can I be sure this new minor version didn't break the public API? 
 As a library writer, how to continuously validate I don't break binary compatibility?
 
-`semantic-versioning` is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
+`semantic-versioning` is a Java library allowing to validate (using bytecode inspection) if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
 It can check JAR files or classes to identify changes between versions and validate if the new version number is correct according to semver.
 
 `semantic-versioning` is available as an [API](#api), a [command line tool](#cli) and a [maven enforcer](http://maven.apache.org/enforcer/maven-enforcer-plugin/) [rule](#rule).
