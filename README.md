@@ -1,17 +1,48 @@
 ![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
 
-Semantic Versioning is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
+Version number changes implications are not always clearly identified. Can I be sure this new minor version didn't break the public API? 
+As a library writer, how to continuously validate I don't break binary compatibility?
 
-Project version number changes implication are not always clearly identified. Will this patch released be safe to use in my project? 
-Does this minor version increment implies my implementation of some API is no more complete? 
-  
-Semantic Versioning can check JAR files to identify breaking changes between versions and identify if your version number is correct according to Semantic Versioning principles.
+`semantic-versioning` is a Java library allowing to validate if library version numbers follows Semantic Versioning principles as defined by [http://semver.org](Semantic Versioning).
+It can check JAR files or classes to identify changes between versions and validate if the new version number is correct according to semver.
 
-# CLI
+`semantic-versioning` is available as an [API](#api), a [command line tool](#cli) and a [maven enforcer](http://maven.apache.org/enforcer/maven-enforcer-plugin/) [rule](#rule).
+
+<a name="api"></a>
+## API overview
+
+Semantic Versioning also provides an API for programmatically validating your project's version number.
+
+```java
+final File previousJar = ...;
+final File currentJar = ...;
+        
+final Comparer comparer = new Comparer(previousJar, currentJar, ..., ...);
+final Delta delta = comparer.diff();
+
+final String compatibilityType = ...;
+
+//Validates that computed and provided compatibility type are compatible.
+final Delta.CompatibilityType expectedCompatibilityType = Delta.CompatibilityType.valueOf(compatibilityType);
+final Delta.CompatibilityType detectedCompatibilityType = delta.computeCompatibilityType();
+if (detectedCompatibilityType.compareTo(expectedCompatibilityType) > 0) {
+  //Not compatible.
+}
+
+//Provide version number for previous and current Jar files.
+final Version previous = Version.parse(...);
+final Version current = Version.parse(...);
+
+//Validates that current version number is valid based on semantic versioning principles.
+final boolean compatible = delta.validate(previous, current);
+```
+
+<a name="cli"></a>
+## CLI
 
 This simple command line tool looks at Java JAR files and determine API changes.
 
-## Built-in help
+### Built-in help
 
 ```
 % java -jar semver.jar --help
@@ -37,7 +68,7 @@ Options:
                           semver specification.
 ```
 
-## Diff
+### Diff
 
 Dump all changes between two JARs on standard output.
 
@@ -51,7 +82,7 @@ Class org.project.MyClass2
  Changed Field field2 removed: final
 ```
 
-## Check
+### Check
 
 Check compatibility type between two JARs.
 
@@ -60,7 +91,7 @@ Check compatibility type between two JARs.
 BACKWARD_COMPATIBLE_IMPLEMENTER
 ```
 
-## Infer
+### Infer
 
 Infer JAR version based on a previously versioned JAR.
 
@@ -69,7 +100,7 @@ Infer JAR version based on a previously versioned JAR.
 1.0.1
 ```
 
-## Validate
+### Validate
 
 Validate JAR version based on a previously versioned JAR.
 
@@ -78,11 +109,12 @@ Validate JAR version based on a previously versioned JAR.
 true
 ```
 
-# Enforcer Rule
+<a name="rule"></a>
+## Maven Enforcer Rule
 
 The enforcer rule offers a rule for checking project's version against a previously released artifact.
 
-## Checking a project's compatibility
+### Checking a project's compatibility
 
 In order to check your project's compatibility, you must add the enforcer rule as a dependency to
 the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run the rule:
@@ -103,7 +135,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.16</version>
+                <version>0.9.17</version>
             </dependency>
             ...
         </dependencies>
@@ -152,7 +184,7 @@ You can force strict checking (i.e. compatibility type must exactly match specif
 </configuration>
 ```
 
-## Checking a project's version
+### Checking a project's version
 
 In order to check your project's version, you must add the enforcer rule as a dependency to
 the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run the rule:
@@ -222,7 +254,7 @@ Dump details of detected changes:
 </configuration>
 ```
 
-## Checking against a well known version
+### Checking against a well known version
 
 You can force check with a well known version:
 
@@ -238,7 +270,7 @@ You can force check with a well known version:
 </configuration>
 ```
 
-## Filtering
+### Filtering
 
 Both rules allow to filter classes/packages:
 
@@ -257,42 +289,16 @@ Both rules allow to filter classes/packages:
 </require...>
 ```
 
-# API overview
-
-Semantic Versioning also provides an API for programmatically validating your project's version number.
-
-```java
-final File previousJar = ...;
-final File currentJar = ...;
-        
-final Comparer comparer = new Comparer(previousJar, currentJar, ..., ...);
-final Delta delta = comparer.diff();
-
-final String compatibilityType = ...;
-
-//Validates that computed and provided compatibility type are compatible.
-final Delta.CompatibilityType expectedCompatibilityType = Delta.CompatibilityType.valueOf(compatibilityType);
-final Delta.CompatibilityType detectedCompatibilityType = delta.computeCompatibilityType();
-if (detectedCompatibilityType.compareTo(expectedCompatibilityType) > 0) {
-  //Not compatible.
-}
-
-//Provide version number for previous and current Jar files.
-final Version previous = Version.parse(...);
-final Version current = Version.parse(...);
-
-//Validates that current version number is valid based on semantic versioning principles.
-final boolean compatible = delta.validate(previous, current);
-```
-
-# Maven dependency
+## Maven dependency
 
 ```xml
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.16</version>
+    <version>0.9.17</version>
 </dependency>
 ```
+
+## License
 
 Released under [Apache 2 license](http://www.apache.org/licenses/LICENSE-2.0.html).
