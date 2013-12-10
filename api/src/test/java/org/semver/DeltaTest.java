@@ -43,7 +43,8 @@ public class DeltaTest {
     public void shouldInferWithNullVersionFail() {
         Delta.inferNextVersion(null, Delta.CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER);
     }
-
+    
+    
     @Test(expected=IllegalArgumentException.class)
     public void shouldInferWithNullCompatibilityTypeFail() {
         Delta.inferNextVersion(new Version(1, 0, 0), null);
