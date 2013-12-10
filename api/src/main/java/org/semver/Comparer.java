@@ -46,7 +46,6 @@ public class Comparer {
         if (!currentJAR.isFile()) {
             throw new IllegalArgumentException("<"+currentJAR+"> is not a valid file");
         }
-        
         this.previousJAR = previousJAR;
         this.currentJAR = currentJAR;
         this.includes = includes;
@@ -60,10 +59,12 @@ public class Comparer {
     public final Delta diff() throws IOException {        
         try {
             final JarDiff jarDiff = new JarDiff();
+
             jarDiff.loadOldClasses(this.previousJAR);
             jarDiff.loadNewClasses(this.currentJAR);
             final DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler(this.includes, this.excludes);
             jarDiff.diff(handler, new SimpleDiffCriteria());
+
             return handler.getDelta();
         } catch (DiffException e) {
             throw new RuntimeException(e);
