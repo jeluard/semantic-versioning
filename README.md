@@ -84,13 +84,13 @@ Class org.project.MyClass2
  Changed Field field2 removed: final
 ```
 
-### excludes/includes
+### Excludes / Includes
 
 In- or exclude classes for the validation by specifying a fully qualified 
-class name or using wild cards. There are two wild cards: "*" and "**".
-"*" is a wild card for an arbitrary number of characters but at most one 
+class name or using wild cards. There are two wild cards: `*` and `**`.
+`*` is a wild card for an arbitrary number of characters but at most one 
 folder hierarchy. 
-"**" is a wild card for an arbitrary number of characters and an arbitrary 
+`**` is a wild card for an arbitrary number of characters and an arbitrary 
 number of folder hierarchies. 
 
 ```
