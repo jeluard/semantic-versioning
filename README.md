@@ -56,11 +56,11 @@ Options:
   --check,-c              Check the compatibility of two jars.
   --diff,-d               Show the differences between two jars.
   --excludes EXCLUDE;...  Semicolon separated list of full qualified class names
-						  or party qualified class names with wild cards
+						  or partly qualified class names with wild cards
                           to be excluded.
   --help,-h               Show this help and exit.
   --includes INCLUDE;...  Semicolon separated list of full qualified class names
-						  or party qualified class names with wild cards
+						  or partly qualified class names with wild cards
                           to be included.
   --infer,-i              Infer the version of the new jar based on the previous
                           jar.
