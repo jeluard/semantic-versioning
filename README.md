@@ -94,7 +94,7 @@ folder hierarchy.
 number of folder hierarchies. 
 
 ```
-% java -jar semver.jar --excludes **/classname; packagename/**/classname; packagename/**/*name;
+% java -jar semver.jar --excludes **/MyClass; org/**/MyClass; org/**/*Class;
 ```
 
 ### Check
