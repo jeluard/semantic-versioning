@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.osjava.jardiff.AbstractDiffHandler;
 import org.osjava.jardiff.ClassInfo;
@@ -209,23 +211,80 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
      *
      * @return
      */
-    private boolean isClassConsidered(final String className) {
-        for (final String exclude : this.excludes) {
-            if (className.startsWith(exclude)) {
-                return false;
-            }
-        }
-
-        if (!this.includes.isEmpty()) {
-            for (final String include : this.includes) {
-                if (className.startsWith(include)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
-    }
+    protected boolean isClassConsidered( final String className ) {
+         for ( String exclude : this.excludes ) {
+             if ( exclude.contains( "/**/" ) ) {
+                 exclude = exclude.replaceAll( "/\\*\\*/", "{0,1}**/" );
+             }
+             if ( exclude.contains( "/*/" ) ) {
+                 exclude = exclude.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
+             }
+             Pattern excludePattern = simplifyRegularExpression( exclude, false );
+ 
+             Matcher excludeMatcher = excludePattern.matcher( className );
+ 
+             while ( excludeMatcher.find() ) {
+                  return false;
+              }
+          }
+         if ( !this.includes.isEmpty() ) {
+             for ( String include : this.includes ) {
+                 if ( include.contains( "/**/" ) ) {
+                     include = include.replaceAll( "/\\*\\*/", "{0,1}**/" );
+                 }
+                 if ( include.contains( "/*/" ) ) {
+                     include = include.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
+                 }
+                 Pattern includePattern = simplifyRegularExpression( include, false );
+                 Matcher includeMatcher = includePattern.matcher( className );
+ 
+                 while ( includeMatcher.find() ) {
+                     return false;
+                  }
+              }
+          }
+          return true;
+      }
+	  
+	  /**
+      * 
+      * Simplifies the given regular expression by the following pattern:<br>
+      * All substrings not containing "{0,1}", "*" and "?" get surrounded by "\\Q" and "\\E". Then all occurrences of
+      * "**" are replaced by ".*", "*" with "[^/]*" and all occurrences of "?" are replaced by "." In the end a "$" will
+      * be appended.
+      * 
+      * @param regEx the regular expression which is in a simple form.
+      * @return the simple regular expression converted to a normal regular expression.
+      */
+     private static Pattern simplifyRegularExpression( final String regEx, final boolean caseSensitive ) {
+         final StringBuilder strBuild = new StringBuilder();
+         final Pattern p = Pattern.compile( "\\{0,1\\}|\\*|\\?|[[^*^?^{^}]|^]+", Pattern.CASE_INSENSITIVE );
+         final Matcher m = p.matcher( regEx );
+ 
+         while ( m.find() ) {
+             final String token = m.group();
+             if ( token.equals( "*" ) || token.equals( "?" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+                 strBuild.append( token );
+             } else if ( token.equals( "{0,1}" ) ) {
+                 strBuild.append( "/" );
+                 strBuild.append( token );
+             } else {
+                 // Surround all tokens that are not "*" or "?" with "\\Q" and \\E"
+                 strBuild.append( "\\Q" ).append( token ).append( "\\E" ); //$NON-NLS-1$ //$NON-NLS-2$
+             }
+         }
+         // Replace all "*" and "?" with .* and .+
+         strBuild.append( "$" );
+         String result = strBuild.toString();
+         result = result.replaceAll( "(?<!\\*)\\*(?!\\*)", "[^/]*" );
+         result = result.replaceAll( "[\\*][\\s]*[\\*]", ".\\*" );
+         result = result.replaceAll( "\\?", "." );
+         if ( caseSensitive ) {
+             return Pattern.compile( result );
+         } else {
+             return Pattern.compile( result, Pattern.CASE_INSENSITIVE );
+         }
+     }
 
     public Delta getDelta() {
         return new Delta(this.differences);
