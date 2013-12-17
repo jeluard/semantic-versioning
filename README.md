@@ -56,9 +56,11 @@ Options:
   --check,-c              Check the compatibility of two jars.
   --diff,-d               Show the differences between two jars.
   --excludes EXCLUDE;...  Semicolon separated list of full qualified class names
+						  or party qualified class names with wild cards
                           to be excluded.
   --help,-h               Show this help and exit.
   --includes INCLUDE;...  Semicolon separated list of full qualified class names
+						  or party qualified class names with wild cards
                           to be included.
   --infer,-i              Infer the version of the new jar based on the previous
                           jar.
@@ -80,6 +82,19 @@ Class org.project.MyClass2
  Added Method method1
  Removed Field field1
  Changed Field field2 removed: final
+```
+
+### excludes/includes
+
+In- or exclude classes for the validation by specifying a fully qualified 
+class name or using wild cards. There are two wild cards: "*" and "**".
+"*" is a wild card for an arbitrary number of characters but at most one 
+folder hierarchy. 
+"**" is a wild card for an arbitrary number of characters and an arbitrary 
+number of folder hierarchies. 
+
+```
+% java -jar semver.jar --excludes **/classname; packagename/**/classname; packagename/**/*name;
 ```
 
 ### Check
