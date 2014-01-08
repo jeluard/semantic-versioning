@@ -101,7 +101,7 @@ public class Main {
             System.exit(0);
         }
 
-        final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.baseJar), config.includes,
+        final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.newJar), config.includes,
                 config.excludes);
         final Delta delta = comparer.diff();
 
