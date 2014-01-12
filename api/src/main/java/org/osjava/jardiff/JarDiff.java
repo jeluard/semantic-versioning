@@ -46,10 +46,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
@@ -187,8 +185,8 @@ public class JarDiff
      * @param reader the ClassReader
      * @return the ClassInfo
      */
-    private synchronized ClassInfo loadClassInfo(ClassReader reader) 
-        throws IOException 
+    private synchronized ClassInfo loadClassInfo(ClassReader reader)
+        throws IOException
     {
         infoVisitor.reset();
         reader.accept(infoVisitor, false);
@@ -202,7 +200,7 @@ public class JarDiff
      * which contain classes in subdirectories or in the current directory.
      *
      * @param infoMap the map to store the ClassInfo in.
-     * @throws DiffException if there is an exception reading info about a 
+     * @throws DiffException if there is an exception reading info about a
      *                       class.
      */
     private void loadClasses(Map infoMap, URL path) throws DiffException {
@@ -241,7 +239,7 @@ public class JarDiff
      *
      * @param infoMap the map to store the ClassInfo in.
      * @param file the jarfile to load classes from.
-     * @throws IOException if there is an IOException reading info about a 
+     * @throws IOException if there is an IOException reading info about a
      *                     class.
      */
     private void loadClasses(Map infoMap, File file) throws DiffException {
@@ -313,7 +311,14 @@ public class JarDiff
      *                       writing to a file caused an IOException
      */
     public void diff(DiffHandler handler, DiffCriteria criteria)
-        throws DiffException 
+        throws DiffException
+    {
+        diff(handler, criteria, oldVersion, newVersion, oldClassInfo, newClassInfo);
+    }
+
+    private void diff(DiffHandler handler, DiffCriteria criteria,
+        String oldVersion, String newVersion,
+        Map oldClassInfo, Map newClassInfo) throws DiffException
     {
         // TODO: Build the name from the MANIFEST rather than the filename
         handler.startDiff(oldVersion, newVersion);
