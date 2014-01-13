@@ -49,10 +49,6 @@ public class ClassInheritanceTest {
   public static class ClassB extends DirectDescendant {
   }
 
-  public static class ClassC {
-    public void totallyDifferentMethod(int x) {};
-  }
-
   @Test
   public void shouldInheritedMethodMatchImplementedMethod() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
     /**
@@ -74,23 +70,34 @@ public class ClassInheritanceTest {
         Map.class, Map.class);
     diffMethod.setAccessible(true);
     loadInfoMethod.setAccessible(true);
-    ClassInfo classInfoA = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(ClassA.class.getName()));
-    oldClassInfoMap.put("ClassA", classInfoA);
-    ClassInfo classInfoB = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(ClassB.class.getName()));
-    newClassInfoMap.put("ClassA", classInfoB);
+    addClassInfo(oldClassInfoMap, ClassA.class, jd, loadInfoMethod);
+    addClassInfo(oldClassInfoMap, DirectDescendant.class, jd, loadInfoMethod);
+    addClassInfo(oldClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
+    addClassInfo(newClassInfoMap, ClassB.class, jd, loadInfoMethod);
+    addClassInfo(newClassInfoMap, DirectDescendant.class, jd, loadInfoMethod);
+    addClassInfo(newClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
+
+    // Make B look like A
+    newClassInfoMap.put(ClassA.class.getName(), newClassInfoMap.get(ClassB.class.getName()));
+    newClassInfoMap.remove(ClassB.class.getName());
     DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler();
     diffMethod.invoke(jd, handler, new SimpleDiffCriteria(),
         "0.1.0", "0.2.0", oldClassInfoMap, newClassInfoMap);
 
     for (Delta.Difference d: handler.getDelta().getDifferences()) {
       System.err.println(d.getClassName() + " : " + d.getClass().getName()
-          + " : " + d.getInfo().getName());
+          + " : " + d.getInfo().getName() + " : " + d.getInfo().getAccessType());
       if (d instanceof Change) {
         System.err.println("  : " + ((Change) d).getModifiedInfo().getName());
       }
     }
-    // We expect the class name change from ClassA to ClassB, and no other changes.
-    Assert.assertEquals("differences found", 1, handler.getDelta().getDifferences().size());
+    Assert.assertEquals("differences found", 0, handler.getDelta().getDifferences().size());
+  }
+
+  private void addClassInfo(Map<String, ClassInfo> classMap, Class klass, JarDiff jd,
+      Method loadInfoMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
+    ClassInfo classInfo = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(ClassA.class.getName()));
+    classMap.put(klass.getName(), classInfo);
   }
 
 }
