@@ -4,7 +4,7 @@
 
   <groupId>org.semver</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.19-SNAPSHOT</version>
+  <version>0.9.20-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Semantic Versioning</name>
@@ -17,7 +17,7 @@
   <parent>
     <groupId>com.github.jeluard</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>3</version>
+    <version>7</version>
   </parent>
 
   <modules>
