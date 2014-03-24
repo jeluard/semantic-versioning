@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Julien Eluard
+ * Copyright 2012-2014 Julien Eluard and contributors
  * This project includes software developed by Julien Eluard: https://github.com/jeluard/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
