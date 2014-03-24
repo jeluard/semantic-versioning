@@ -63,6 +63,12 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>1.5</version>
         <executions>
