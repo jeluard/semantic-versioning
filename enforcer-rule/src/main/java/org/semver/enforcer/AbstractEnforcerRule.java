@@ -50,6 +50,7 @@ import org.semver.Version;
 public abstract class AbstractEnforcerRule implements EnforcerRule {
 
     private static final String JAR_ARTIFACT_TYPE = "jar";
+    private static final String BUNDLE_ARTIFACT_TYPE = "bundle";
     
     /**
      * Version number of artifact to be checked.
@@ -95,8 +96,10 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
             throw new EnforcerRuleException("Failed to access ${project} variable", e);
         }
         final String type = project.getArtifact().getType();
-        if (!AbstractEnforcerRule.JAR_ARTIFACT_TYPE.equals(type)) {
-            helper.getLog().debug("Skipping non "+AbstractEnforcerRule.JAR_ARTIFACT_TYPE+" artifact.");
+        if (!AbstractEnforcerRule.JAR_ARTIFACT_TYPE.equals(type) &&
+            !AbstractEnforcerRule.BUNDLE_ARTIFACT_TYPE.equals(type)) {
+            helper.getLog().debug("Skipping non "+AbstractEnforcerRule.JAR_ARTIFACT_TYPE+
+              " or " + BUNDLE_ARTIFACT_TYPE + " artifact.");
             return;
         }
 
