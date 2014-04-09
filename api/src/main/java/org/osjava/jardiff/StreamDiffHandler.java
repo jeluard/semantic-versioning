@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+
 import org.objectweb.asm.Type;
 
 /**
@@ -395,6 +396,14 @@ public class StreamDiffHandler implements DiffHandler
     }
     
     /**
+     * Invokes {@link #classChanged(ClassInfo, ClassInfo)}.
+     */
+    public void classDeprecated(ClassInfo oldInfo, ClassInfo newInfo)
+	    throws DiffException {
+	classChanged(oldInfo, newInfo);
+    }
+
+    /**
      * Write out info aboout a changed field.
      * This writes out a &lt;fieldchange&gt; node, followed by a 
      * &lt;from&gt; node, with the old information about the field
@@ -421,6 +430,14 @@ public class StreamDiffHandler implements DiffHandler
     }
     
     /**
+     * Invokes {@link #fieldChanged(FieldInfo, FieldInfo)}.
+     */
+    public void fieldDeprecated(FieldInfo oldInfo, FieldInfo newInfo)
+	    throws DiffException {
+	fieldChanged(oldInfo, newInfo);
+    }
+
+    /**
      * Write out info aboout a changed method.
      * This writes out a &lt;methodchange&gt; node, followed by a 
      * &lt;from&gt; node, with the old information about the method
@@ -446,6 +463,14 @@ public class StreamDiffHandler implements DiffHandler
         }
     }
     
+    /**
+     * Invokes {@link #methodChanged(MethodInfo, MethodInfo)}.
+     */
+    public void methodDeprecated(MethodInfo oldInfo, MethodInfo newInfo)
+	    throws DiffException {
+	methodChanged(oldInfo, newInfo);
+    }
+
     /**
      * End the changed section for an individual class.
      * This closes the &lt;classchanged&gt; node.

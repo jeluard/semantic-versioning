@@ -19,9 +19,10 @@ package org.semver.jardiff;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
 
 import org.osjava.jardiff.AbstractDiffHandler;
 import org.osjava.jardiff.ClassInfo;
@@ -31,6 +32,7 @@ import org.osjava.jardiff.MethodInfo;
 import org.semver.Delta;
 import org.semver.Delta.Add;
 import org.semver.Delta.Change;
+import org.semver.Delta.Deprecate;
 import org.semver.Delta.Difference;
 import org.semver.Delta.Remove;
 
@@ -141,6 +143,15 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
     }
 
     @Override
+    public void classDeprecated(final ClassInfo oldClassInfo, final ClassInfo newClassInfo) throws DiffException {
+	if (!isClassConsidered(oldClassInfo.getName())) {
+	    return;
+	}
+
+	this.differences.add(new Deprecate(getClassName(oldClassInfo.getName()), oldClassInfo, newClassInfo));
+    }
+
+    @Override
     public void fieldChanged(final FieldInfo oldFieldInfo, final FieldInfo newFieldInfo) throws DiffException {
         if (!isClassConsidered(getCurrentClassName())) {
             return;
@@ -150,12 +161,30 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
     }
 
     @Override
+    public void fieldDeprecated(final FieldInfo oldFieldInfo, final FieldInfo newFieldInfo) throws DiffException {
+	if (!isClassConsidered(getCurrentClassName())) {
+	    return;
+	}
+
+	this.differences.add(new Deprecate(getCurrentClassName(), oldFieldInfo, newFieldInfo));
+    }
+
+    @Override
     public void methodChanged(final MethodInfo oldMethodInfo, final MethodInfo newMethodInfo) throws DiffException {
         if (!isClassConsidered(getCurrentClassName())) {
             return;
         }
 
         this.differences.add(new Change(getCurrentClassName(), oldMethodInfo, newMethodInfo));
+    }
+
+    @Override
+    public void methodDeprecated(final MethodInfo oldMethodInfo, final MethodInfo newMethodInfo) throws DiffException {
+	if (!isClassConsidered(getCurrentClassName())) {
+	    return;
+	}
+
+	this.differences.add(new Deprecate(getCurrentClassName(), oldMethodInfo, newMethodInfo));
     }
 
     @Override
