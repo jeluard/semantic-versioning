@@ -41,7 +41,10 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 */
 
+
+
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A class to perform a diff between two jar files.
@@ -123,7 +126,7 @@ public class JarDiff
     /**
      * Set the name of the new version.
      *
-     * @param newVersion
+     * @param newVersion the version
      */
     public void setNewVersion(String newVersion) {
         this.newVersion = newVersion;
@@ -273,7 +276,7 @@ public class JarDiff
      * Load new classes from the specified File.
      *
      * @param file The location of a jar file to load classes from.
-     * @throws DiffExeption if there is an IOException
+     * @throws DiffException if there is an IOException
      */
     public void loadNewClasses(File file) throws DiffException {
         loadClasses(newClassInfo, file);
@@ -440,20 +443,44 @@ public class JarDiff
                                 newMethods.get(j.next()));
                     handler.endAdded();
                     handler.startChanged();
-                    if (classchanged)
-                        handler.classChanged(oci, nci);
-                    j = changedFields.iterator();
-                    while (j.hasNext()) {
-                        Object tmp = j.next();
-                        handler.fieldChanged((FieldInfo) oldFields.get(tmp),
-                                (FieldInfo) newFields.get(tmp));
+                    if (classchanged) {
+			// Was only deprecated?
+			if (wasDeprecated(oci, nci)
+				&& !criteria.differs(cloneDeprecated(oci), nci))
+			    handler.classDeprecated(oci, nci);
+			else
+			    handler.classChanged(oci, nci);
                     }
+                    j = changedFields.iterator();
+		    while (j.hasNext()) {
+			Object tmp = j.next();
+			FieldInfo oldFieldInfo = (FieldInfo) oldFields.get(tmp);
+			FieldInfo newFieldInfo = (FieldInfo) newFields.get(tmp);
+			// Was only deprecated?
+			if (wasDeprecated(oldFieldInfo, newFieldInfo)
+				&& !criteria.differs(
+					cloneDeprecated(oldFieldInfo),
+					newFieldInfo))
+			    handler.fieldDeprecated(oldFieldInfo, newFieldInfo);
+			else
+			    handler.fieldChanged(oldFieldInfo, newFieldInfo);
+		    }
                     j = changedMethods.iterator();
                     while (j.hasNext()) {
-                        Object tmp = j.next();
-                        handler.methodChanged((MethodInfo) oldMethods.get(tmp),
-                                ((MethodInfo)
-                                 newMethods.get(tmp)));
+			Object tmp = j.next();
+			MethodInfo oldMethodInfo = (MethodInfo) oldMethods
+				.get(tmp);
+			MethodInfo newMethodInfo = (MethodInfo) newMethods
+				.get(tmp);
+			// Was only deprecated?
+			if (wasDeprecated(oldMethodInfo, newMethodInfo)
+				&& !criteria.differs(
+					cloneDeprecated(oldMethodInfo),
+					newMethodInfo))
+			    handler.methodDeprecated(oldMethodInfo,
+				    newMethodInfo);
+			else
+			    handler.methodChanged(oldMethodInfo, newMethodInfo);
                     }
                     handler.endChanged();
                     handler.endClassChanged();
@@ -468,5 +495,55 @@ public class JarDiff
         }
         handler.endChanged();
         handler.endDiff();
+    }
+
+    /**
+     * Determines if an {@link AbstractInfo} was deprecated. (Shortcut to avoid
+     * creating cloned deprecated infos).
+     */
+    private static boolean wasDeprecated(AbstractInfo oldInfo,
+	    AbstractInfo newInfo) {
+	return !oldInfo.isDeprecated() && newInfo.isDeprecated();
+    }
+
+    /**
+     * Clones the class info, but changes access, setting deprecated flag.
+     * 
+     * @param classInfo
+     *            the original class info
+     * @return the cloned and deprecated info.
+     */
+    private static ClassInfo cloneDeprecated(ClassInfo classInfo) {
+	return new ClassInfo(classInfo.getVersion(), classInfo.getAccess()
+		| Opcodes.ACC_DEPRECATED, classInfo.getName(),
+		classInfo.getSignature(), classInfo.getSupername(),
+		classInfo.getInterfaces(), classInfo.getMethodMap(),
+		classInfo.getFieldMap());
+    }
+
+    /**
+     * Clones the method, but changes access, setting deprecated flag.
+     * 
+     * @param methodInfo
+     *            the original method info
+     * @return the cloned and deprecated method info.
+     */
+    private static MethodInfo cloneDeprecated(MethodInfo methodInfo) {
+	return new MethodInfo(methodInfo.getAccess() | Opcodes.ACC_DEPRECATED,
+		methodInfo.getName(), methodInfo.getDesc(),
+		methodInfo.getSignature(), methodInfo.getExceptions());
+    }
+
+    /**
+     * Clones the field info, but changes access, setting deprecated flag.
+     * 
+     * @param fieldInfo
+     *            the original field info
+     * @return the cloned and deprecated field info.
+     */
+    private static FieldInfo cloneDeprecated(FieldInfo fieldInfo) {
+	return new FieldInfo(fieldInfo.getAccess() | Opcodes.ACC_DEPRECATED,
+		fieldInfo.getName(), fieldInfo.getDesc(),
+		fieldInfo.getSignature(), fieldInfo.getValue());
     }
 }

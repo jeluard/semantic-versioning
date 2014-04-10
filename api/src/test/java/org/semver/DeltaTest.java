@@ -21,7 +21,9 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.osjava.jardiff.ClassInfo;
 import org.osjava.jardiff.FieldInfo;
+import org.osjava.jardiff.MethodInfo;
 
 public class DeltaTest {
 
@@ -142,4 +144,18 @@ public class DeltaTest {
         Assert.assertFalse(new Delta(Collections.singleton(new Delta.Remove("class", new FieldInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 1, 1)));
     }
 
+    @Test
+    public void upgradeMinorVersionOnClassDeprecated() {
+        Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new ClassInfo(1, 0, "", "", "", null, null, null), new ClassInfo(1, 0, "", "", "", null, null, null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+    }
+
+    @Test
+    public void upgradeMinorVersionOnFieldDeprecated() {
+	Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new FieldInfo(0, "", "", "", null), new FieldInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+    }
+
+    @Test
+    public void upgradeMinorVersionOnMethodDeprecated() {
+	Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new MethodInfo(0, "", "", "", null), new MethodInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+    }
 }

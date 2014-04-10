@@ -194,6 +194,17 @@ public interface DiffHandler
         throws DiffException;
     
     /**
+     * The current class has been deprecated.
+     *
+     * @param oldClassinfo Information about the old class.
+     * @param newClassinfo Information about the new class.
+     * @throws DiffException when there is an underlying exception, e.g.
+     *                       writing to a file caused an IOException
+     */
+    public void classDeprecated(ClassInfo oldClassinfo, ClassInfo newClassinfo)
+	    throws DiffException;
+
+    /**
      * A field on the current class has changed.
      *
      * @param oldFieldinfo Information about the old field.
@@ -205,6 +216,17 @@ public interface DiffHandler
         throws DiffException;
     
     /**
+     * A field on the current class has been deprecated.
+     *
+     * @param oldFieldinfo Information about the old field.
+     * @param newFieldinfo Information about the new field.
+     * @throws DiffException when there is an underlying exception, e.g.
+     *                       writing to a file caused an IOException
+     */
+    public void fieldDeprecated(FieldInfo oldFieldinfo, FieldInfo newFieldinfo)
+	    throws DiffException;
+
+    /**
      * A method on the current class has changed.
      *
      * @param oldMethodInfo Information about the old method.
@@ -214,7 +236,18 @@ public interface DiffHandler
      */
     public void methodChanged
         (MethodInfo oldMethodInfo, MethodInfo newMethodInfo) throws DiffException;
-    
+
+    /**
+     * The method has been deprecated.
+     *
+     * @param oldMethodInfo Information about the old method.
+     * @param newMethodInfo Information about the new method.
+     * @throws DiffException when there is an underlying exception, e.g.
+     *                       writing to a file caused an IOException
+     */
+    public void methodDeprecated(MethodInfo oldMethodInfo,
+	    MethodInfo newMethodInfo) throws DiffException;
+
     /**
      * End of changes for the current class.
      *

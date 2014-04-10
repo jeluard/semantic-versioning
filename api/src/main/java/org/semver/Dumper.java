@@ -78,7 +78,6 @@ public final class Dumper {
         accumulateAccessDetails("abstract", previousInfo.isAbstract(), currentInfo.isAbstract(), added, removed);
         accumulateAccessDetails("annotation", previousInfo.isAnnotation(), currentInfo.isAnnotation(), added, removed);
         accumulateAccessDetails("bridge", previousInfo.isBridge(), currentInfo.isBridge(), added, removed);
-        accumulateAccessDetails("deprecated", previousInfo.isDeprecated(), currentInfo.isDeprecated(), added, removed);
         accumulateAccessDetails("enum", previousInfo.isEnum(), currentInfo.isEnum(), added, removed);
         accumulateAccessDetails("final", previousInfo.isFinal(), currentInfo.isFinal(), added, removed);
         accumulateAccessDetails("interface", previousInfo.isInterface(), currentInfo.isInterface(), added, removed);

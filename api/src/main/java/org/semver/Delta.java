@@ -107,6 +107,24 @@ public final class Delta {
     }
 
     @Immutable
+    public static class Deprecate extends Difference {
+
+	private final AbstractInfo modifiedInfo;
+
+	public Deprecate(@Nonnull final String className,
+		@Nonnull final AbstractInfo info,
+		@Nonnull final AbstractInfo modifiedInfo) {
+	    super(className, info);
+
+	    this.modifiedInfo = modifiedInfo;
+	}
+
+	public AbstractInfo getModifiedInfo() {
+	    return this.modifiedInfo;
+	}
+    }
+
+    @Immutable
     public static class Remove extends Difference {
         
         public Remove(@Nonnull final String className, @Nonnull final AbstractInfo info) {
@@ -132,10 +150,12 @@ public final class Delta {
      */
     @Nonnull
     public final CompatibilityType computeCompatibilityType() {
+
         if (contains(this.differences, Change.class) ||
             contains(this.differences, Remove.class)) {
             return CompatibilityType.NON_BACKWARD_COMPATIBLE;
-        } else if (contains(this.differences, Add.class)) {
+        } else if (contains(this.differences, Add.class) || 
+                contains(this.differences, Deprecate.class)) {
             return CompatibilityType.BACKWARD_COMPATIBLE_USER;
         } else {
             return CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER;
