@@ -150,7 +150,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.20</version>
+                <version>0.9.22</version>
             </dependency>
             ...
         </dependencies>
@@ -220,7 +220,7 @@ the maven-enforcer-plugin and then configure the maven-enforcer-plugin to run th
             <dependency>
                 <groupId>org.semver</groupId>
                 <artifactId>enforcer-rule</artifactId>
-                <version>0.9.20</version>
+                <version>0.9.22</version>
             </dependency>
             ...
         </dependencies>
@@ -310,7 +310,7 @@ Both rules allow to filter classes/packages:
 <dependency>
     <groupId>org.semver</groupId>
     <artifactId>enforcer-rule</artifactId>
-    <version>0.9.20</version>
+    <version>0.9.22</version>
 </dependency>
 ```
 
