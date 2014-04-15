@@ -17,7 +17,7 @@
   <parent>
     <groupId>com.github.jeluard</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>8</version>
   </parent>
 
   <modules>
