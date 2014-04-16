@@ -366,33 +366,34 @@ public class JarDiff
             if (criteria.validClass(oci) || criteria.validClass(nci)) {
                 Map oldMethods = oci.getMethodMap();
                 Map oldFields = oci.getFieldMap();
-                Map extOldMethods = new HashMap(oldMethods);
-                Map extOldFields = new HashMap(oldFields);
+                Map newMethods = nci.getMethodMap();
+                Map newFields = nci.getFieldMap();
 
-                String superClass = oci.getSupername();
-                while (superClass != null && oldClassInfo.containsKey(superClass)) {
-                    ClassInfo sci = (ClassInfo) oldClassInfo.get(superClass);
+                Map extNewMethods = new HashMap(newMethods);
+                Map extNewFields = new HashMap(newFields);
+
+                String superClass = nci.getSupername();
+                while (superClass != null && newClassInfo.containsKey(superClass)) {
+                    ClassInfo sci = (ClassInfo) newClassInfo.get(superClass);
                     Iterator j = sci.getFieldMap().entrySet().iterator();
                     while (j.hasNext()) {
                         Map.Entry entry = (Map.Entry) j.next();
                         if (!((FieldInfo)entry.getValue()).isPrivate()
-                            && !extOldFields.containsKey(entry.getKey())) {
-                            extOldFields.put(entry.getKey(), entry.getValue());
+                            && !extNewFields.containsKey(entry.getKey())) {
+                            extNewFields.put(entry.getKey(), entry.getValue());
                         }
                     }
                     j = sci.getMethodMap().entrySet().iterator();
                     while (j.hasNext()) {
                         Map.Entry entry = (Map.Entry) j.next();
                         if (!((MethodInfo)entry.getValue()).isPrivate()
-                            && !extOldMethods.containsKey(entry.getKey())) {
-                            extOldMethods.put(entry.getKey(), entry.getValue());
+                            && !extNewMethods.containsKey(entry.getKey())) {
+                            extNewMethods.put(entry.getKey(), entry.getValue());
                         }
                     }
                     superClass = sci.getSupername();
                 }
 
-                Map newMethods = nci.getMethodMap();
-                Map newFields = nci.getFieldMap();
                 Iterator j = oldMethods.entrySet().iterator();
                 while (j.hasNext()) {
                     Map.Entry entry = (Map.Entry) j.next();
@@ -421,12 +422,12 @@ public class JarDiff
                 changedMethods.addAll(removedMethods);
                 changedMethods.retainAll(addedMethods);
                 removedMethods.removeAll(changedMethods);
-                removedMethods.removeAll(extOldMethods.keySet());
+                removedMethods.removeAll(extNewMethods.keySet());
                 addedMethods.removeAll(changedMethods);
                 changedFields.addAll(removedFields);
                 changedFields.retainAll(addedFields);
                 removedFields.removeAll(changedFields);
-                removedFields.removeAll(extOldFields.keySet());
+                removedFields.removeAll(extNewFields.keySet());
                 addedFields.removeAll(changedFields);
                 j = changedMethods.iterator();
                 while (j.hasNext()) {
