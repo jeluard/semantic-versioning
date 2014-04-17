@@ -91,8 +91,9 @@ public class DeprecateDetectionTest {
     addClassInfo(newClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
 
     // Make B look like A
-    newClassInfoMap.put(ClassA.class.getName(), newClassInfoMap.get(ClassB.class.getName()));
-    newClassInfoMap.remove(ClassB.class.getName());
+    newClassInfoMap.put("org/semver/jardiff/DeprecateDetectionTest$ClassA",
+            newClassInfoMap.get("org/semver/jardiff/DeprecateDetectionTest$ClassB"));
+    newClassInfoMap.remove("org/semver/jardiff/DeprecateDetectionTest$ClassB");
     DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler();
     diffMethod.invoke(jd, handler, new SimpleDiffCriteria(),
         "0.1.0", "0.2.0", oldClassInfoMap, newClassInfoMap);
@@ -113,6 +114,6 @@ public class DeprecateDetectionTest {
   private void addClassInfo(Map<String, ClassInfo> classMap, Class klass, JarDiff jd,
       Method loadInfoMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
     ClassInfo classInfo = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(klass.getName()));
-    classMap.put(klass.getName(), classInfo);
+    classMap.put(classInfo.getName(), classInfo);
   }
 }

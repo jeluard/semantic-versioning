@@ -436,8 +436,6 @@ public class JarDiff
                     MethodInfo newInfo = (MethodInfo) newMethods.get(desc);
                     if (!criteria.differs(oldInfo, newInfo))
                         j.remove();
-                    else if (oldInfo.isPrivate() && newInfo.isPrivate())
-                        j.remove();
                 }
                 j = changedFields.iterator();
                 while (j.hasNext()) {
@@ -446,8 +444,6 @@ public class JarDiff
                     FieldInfo newInfo = (FieldInfo) newFields.get(desc);
                     if (!criteria.differs(oldInfo, newInfo))
                         j.remove();
-                    else if (oldInfo.isPrivate() && newInfo.isPrivate())
-                        j.remove();;
                 }
                 boolean classchanged = criteria.differs(oci, nci);
                 if (classchanged || !removedMethods.isEmpty()
