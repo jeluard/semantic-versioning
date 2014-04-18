@@ -81,8 +81,12 @@ public class ClassInheritanceTest {
     addClassInfo(newClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
 
     // Make B look like A
-    newClassInfoMap.put(ClassA.class.getName(), newClassInfoMap.get(ClassB.class.getName()));
-    newClassInfoMap.remove(ClassB.class.getName());
+    ClassInfo a = oldClassInfoMap.get("org/semver/jardiff/ClassInheritanceTest$ClassA");
+    ClassInfo b = newClassInfoMap.get("org/semver/jardiff/ClassInheritanceTest$ClassB");
+    newClassInfoMap.put(a.getName(), new ClassInfo(b.getVersion(), b.getAccess(), a.getName(),
+            b.getSignature(), b.getSupername(), b.getInterfaces(),
+            b.getMethodMap(), b.getFieldMap()));
+    newClassInfoMap.remove(b.getName());
     DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler();
     diffMethod.invoke(jd, handler, new SimpleDiffCriteria(),
         "0.1.0", "0.2.0", oldClassInfoMap, newClassInfoMap);
@@ -94,13 +98,13 @@ public class ClassInheritanceTest {
         System.err.println("  : " + ((Change) d).getModifiedInfo().getName());
       }
     }
-    Assert.assertEquals("differences found", 0, handler.getDelta().getDifferences().size());
+    Assert.assertEquals("differences found", 1, handler.getDelta().getDifferences().size());
   }
 
   private void addClassInfo(Map<String, ClassInfo> classMap, Class klass, JarDiff jd,
       Method loadInfoMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-    ClassInfo classInfo = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(ClassA.class.getName()));
-    classMap.put(klass.getName(), classInfo);
+    ClassInfo classInfo = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(klass.getName()));
+    classMap.put(classInfo.getName(), classInfo);
   }
 
 }

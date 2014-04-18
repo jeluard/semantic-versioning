@@ -368,6 +368,32 @@ public class JarDiff
                 Map oldFields = oci.getFieldMap();
                 Map newMethods = nci.getMethodMap();
                 Map newFields = nci.getFieldMap();
+
+                Map extNewMethods = new HashMap(newMethods);
+                Map extNewFields = new HashMap(newFields);
+
+                String superClass = nci.getSupername();
+                while (superClass != null && newClassInfo.containsKey(superClass)) {
+                    ClassInfo sci = (ClassInfo) newClassInfo.get(superClass);
+                    Iterator j = sci.getFieldMap().entrySet().iterator();
+                    while (j.hasNext()) {
+                        Map.Entry entry = (Map.Entry) j.next();
+                        if (!((FieldInfo)entry.getValue()).isPrivate()
+                            && !extNewFields.containsKey(entry.getKey())) {
+                            extNewFields.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    j = sci.getMethodMap().entrySet().iterator();
+                    while (j.hasNext()) {
+                        Map.Entry entry = (Map.Entry) j.next();
+                        if (!((MethodInfo)entry.getValue()).isPrivate()
+                            && !extNewMethods.containsKey(entry.getKey())) {
+                            extNewMethods.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    superClass = sci.getSupername();
+                }
+
                 Iterator j = oldMethods.entrySet().iterator();
                 while (j.hasNext()) {
                     Map.Entry entry = (Map.Entry) j.next();
@@ -392,13 +418,16 @@ public class JarDiff
                     if (criteria.validField((FieldInfo) entry.getValue()))
                         addedFields.add(entry.getKey());
                 }
+
                 changedMethods.addAll(removedMethods);
                 changedMethods.retainAll(addedMethods);
                 removedMethods.removeAll(changedMethods);
+                removedMethods.removeAll(extNewMethods.keySet());
                 addedMethods.removeAll(changedMethods);
                 changedFields.addAll(removedFields);
                 changedFields.retainAll(addedFields);
                 removedFields.removeAll(changedFields);
+                removedFields.removeAll(extNewFields.keySet());
                 addedFields.removeAll(changedFields);
                 j = changedMethods.iterator();
                 while (j.hasNext()) {
