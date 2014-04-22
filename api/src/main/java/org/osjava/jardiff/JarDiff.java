@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 package org.osjava.jardiff;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+
 /*
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Transformer;
@@ -40,11 +36,6 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 */
-
-
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
 
 /**
  * A class to perform a diff between two jar files.
@@ -65,14 +56,14 @@ public class JarDiff
      * Keys are internal class names.
      * Values are instances of ClassInfo.
      */
-    protected Map oldClassInfo = new TreeMap();
+    protected Map<String, ClassInfo> oldClassInfo = new TreeMap<String, ClassInfo>();
 
     /**
      * A map containing information about classes in the new jar file.
      * Keys are internal class names.
      * Values are instances of ClassInfo.
      */
-    protected Map newClassInfo = new TreeMap();
+    protected Map<String, ClassInfo> newClassInfo = new TreeMap<String, ClassInfo>();
 
     /**
      * An array of dependencies which are jar files, or urls.
@@ -166,7 +157,7 @@ public class JarDiff
      * @param reader the ClassReader
      * @return the ClassInfo
      */
-    private synchronized ClassInfo loadClassInfo(ClassReader reader)
+    public synchronized ClassInfo loadClassInfo(ClassReader reader)
         throws IOException
     {
         infoVisitor.reset();
@@ -297,125 +288,107 @@ public class JarDiff
         diff(handler, criteria, oldVersion, newVersion, oldClassInfo, newClassInfo);
     }
 
-    private void diff(DiffHandler handler, DiffCriteria criteria,
+    public void diff(DiffHandler handler, DiffCriteria criteria,
         String oldVersion, String newVersion,
-        Map oldClassInfo, Map newClassInfo) throws DiffException
+        Map<String, ClassInfo> oldClassInfo, Map<String, ClassInfo> newClassInfo) throws DiffException
     {
         // TODO: Build the name from the MANIFEST rather than the filename
         handler.startDiff(oldVersion, newVersion);
-        Iterator i;
 
         handler.startOldContents();
-        i = oldClassInfo.entrySet().iterator();
-        while(i.hasNext()) {
-            Map.Entry entry = (Map.Entry) i.next();
-            ClassInfo ci = (ClassInfo) entry.getValue();
-            if(criteria.validClass(ci)) {
+        for (ClassInfo ci : oldClassInfo.values()) {
+            if (criteria.validClass(ci)) {
                 handler.contains(ci);
             }
         }
         handler.endOldContents();
 
         handler.startNewContents();
-        i = newClassInfo.entrySet().iterator();
-        while(i.hasNext()) {
-            Map.Entry entry = (Map.Entry) i.next();
-            ClassInfo ci = (ClassInfo) entry.getValue();
-            if(criteria.validClass(ci)) {
+        for (ClassInfo ci : newClassInfo.values()) {
+            if (criteria.validClass(ci)) {
                 handler.contains(ci);
             }
         }
         handler.endNewContents();
 
-        java.util.Set onlyOld = new TreeSet(oldClassInfo.keySet());
-        java.util.Set onlyNew = new TreeSet(newClassInfo.keySet());
-        java.util.Set both = new TreeSet(oldClassInfo.keySet());
+        Set<String> onlyOld = new TreeSet<String>(oldClassInfo.keySet());
+        Set<String> onlyNew = new TreeSet<String>(newClassInfo.keySet());
+        Set<String> both = new TreeSet<String>(oldClassInfo.keySet());
         onlyOld.removeAll(newClassInfo.keySet());
         onlyNew.removeAll(oldClassInfo.keySet());
         both.retainAll(newClassInfo.keySet());
+
         handler.startRemoved();
-        i = onlyOld.iterator();
-        while (i.hasNext()) {
-            String s = (String) i.next();
-            ClassInfo ci = (ClassInfo) oldClassInfo.get(s);
-            if (criteria.validClass(ci))
+        for (String s : onlyOld) {
+            ClassInfo ci = oldClassInfo.get(s);
+            if (criteria.validClass(ci)) {
                 handler.classRemoved(ci);
+            }
         }
         handler.endRemoved();
+
         handler.startAdded();
-        i = onlyNew.iterator();
-        while (i.hasNext()) {
-            String s = (String) i.next();
-            ClassInfo ci = (ClassInfo) newClassInfo.get(s);
-            if (criteria.validClass(ci))
+        for (String s : onlyNew) {
+            ClassInfo ci = newClassInfo.get(s);
+            if (criteria.validClass(ci)) {
                 handler.classAdded(ci);
+            }
         }
         handler.endAdded();
-        java.util.Set removedMethods = new TreeSet();
-        java.util.Set removedFields = new TreeSet();
-        java.util.Set addedMethods = new TreeSet();
-        java.util.Set addedFields = new TreeSet();
-        java.util.Set changedMethods = new TreeSet();
-        java.util.Set changedFields = new TreeSet();
-        handler.startChanged();
-        i = both.iterator();
-        while (i.hasNext()) {
-            String s = (String) i.next();
-            ClassInfo oci = (ClassInfo) oldClassInfo.get(s);
-            ClassInfo nci = (ClassInfo) newClassInfo.get(s);
-            if (criteria.validClass(oci) || criteria.validClass(nci)) {
-                Map oldMethods = oci.getMethodMap();
-                Map oldFields = oci.getFieldMap();
-                Map newMethods = nci.getMethodMap();
-                Map newFields = nci.getFieldMap();
 
-                Map extNewMethods = new HashMap(newMethods);
-                Map extNewFields = new HashMap(newFields);
+        Set<String> removedMethods = new TreeSet<String>();
+        Set<String> removedFields = new TreeSet<String>();
+        Set<String> addedMethods = new TreeSet<String>();
+        Set<String> addedFields = new TreeSet<String>();
+        Set<String> changedMethods = new TreeSet<String>();
+        Set<String> changedFields = new TreeSet<String>();
+
+        handler.startChanged();
+        for (String s : both) {
+            ClassInfo oci = oldClassInfo.get(s);
+            ClassInfo nci = newClassInfo.get(s);
+            if (criteria.validClass(oci) || criteria.validClass(nci)) {
+                Map<String, MethodInfo> oldMethods = oci.getMethodMap();
+                Map<String, FieldInfo> oldFields = oci.getFieldMap();
+                Map<String, MethodInfo> newMethods = nci.getMethodMap();
+                Map<String, FieldInfo> newFields = nci.getFieldMap();
+
+                Map<String, MethodInfo> extNewMethods = new HashMap<String, MethodInfo>(newMethods);
+                Map<String, FieldInfo> extNewFields = new HashMap<String, FieldInfo>(newFields);
 
                 String superClass = nci.getSupername();
                 while (superClass != null && newClassInfo.containsKey(superClass)) {
-                    ClassInfo sci = (ClassInfo) newClassInfo.get(superClass);
-                    Iterator j = sci.getFieldMap().entrySet().iterator();
-                    while (j.hasNext()) {
-                        Map.Entry entry = (Map.Entry) j.next();
-                        if (!((FieldInfo)entry.getValue()).isPrivate()
-                            && !extNewFields.containsKey(entry.getKey())) {
+                    ClassInfo sci = newClassInfo.get(superClass);
+                    for (Map.Entry<String, FieldInfo> entry : sci.getFieldMap().entrySet()) {
+                        if (!(entry.getValue()).isPrivate()
+                                && !extNewFields.containsKey(entry.getKey())) {
                             extNewFields.put(entry.getKey(), entry.getValue());
                         }
                     }
-                    j = sci.getMethodMap().entrySet().iterator();
-                    while (j.hasNext()) {
-                        Map.Entry entry = (Map.Entry) j.next();
-                        if (!((MethodInfo)entry.getValue()).isPrivate()
-                            && !extNewMethods.containsKey(entry.getKey())) {
+                    for (Map.Entry<String, MethodInfo> entry : sci.getMethodMap().entrySet()) {
+                        if (!(entry.getValue()).isPrivate()
+                                && !extNewMethods.containsKey(entry.getKey())) {
                             extNewMethods.put(entry.getKey(), entry.getValue());
                         }
                     }
                     superClass = sci.getSupername();
                 }
 
-                Iterator j = oldMethods.entrySet().iterator();
-                while (j.hasNext()) {
-                    Map.Entry entry = (Map.Entry) j.next();
-                    if (criteria.validMethod((MethodInfo) entry.getValue()))
+                for (Map.Entry<String, MethodInfo> entry : oldMethods.entrySet()) {
+                    if (criteria.validMethod(entry.getValue()))
                         removedMethods.add(entry.getKey());
                 }
-                j = oldFields.entrySet().iterator();
-                while (j.hasNext()) {
-                    Map.Entry entry = (Map.Entry) j.next();
-                    if (criteria.validField((FieldInfo) entry.getValue()))
+                for (Map.Entry<String, FieldInfo> entry : oldFields.entrySet()) {
+                    if (criteria.validField(entry.getValue()))
                         removedFields.add(entry.getKey());
                 }
-                j = newMethods.entrySet().iterator();
-                while (j.hasNext()) {
-                    Map.Entry entry = (Map.Entry) j.next();
-                    if (criteria.validMethod((MethodInfo) entry.getValue()))
+
+                for (Map.Entry<String, MethodInfo> entry : newMethods.entrySet()) {
+                    if (criteria.validMethod(entry.getValue()))
                         addedMethods.add(entry.getKey());
                 }
-                j = newFields.entrySet().iterator();
-                while (j.hasNext()) {
-                    Map.Entry entry = (Map.Entry) j.next();
-                    if (criteria.validField((FieldInfo) entry.getValue()))
+                for (Map.Entry<String, FieldInfo> entry : newFields.entrySet()) {
+                    if (criteria.validField(entry.getValue()))
                         addedFields.add(entry.getKey());
                 }
 
@@ -429,90 +402,87 @@ public class JarDiff
                 removedFields.removeAll(changedFields);
                 removedFields.removeAll(extNewFields.keySet());
                 addedFields.removeAll(changedFields);
-                j = changedMethods.iterator();
+
+                Iterator<String> j = changedMethods.iterator();
                 while (j.hasNext()) {
-                    String desc = (String) j.next();
-                    MethodInfo oldInfo = (MethodInfo) oldMethods.get(desc);
-                    MethodInfo newInfo = (MethodInfo) newMethods.get(desc);
+                    String desc = j.next();
+                    MethodInfo oldInfo = oldMethods.get(desc);
+                    MethodInfo newInfo = newMethods.get(desc);
                     if (!criteria.differs(oldInfo, newInfo))
                         j.remove();
                 }
                 j = changedFields.iterator();
                 while (j.hasNext()) {
-                    String desc = (String) j.next();
-                    FieldInfo oldInfo = (FieldInfo) oldFields.get(desc);
-                    FieldInfo newInfo = (FieldInfo) newFields.get(desc);
+                    String desc = j.next();
+                    FieldInfo oldInfo = oldFields.get(desc);
+                    FieldInfo newInfo = newFields.get(desc);
                     if (!criteria.differs(oldInfo, newInfo))
                         j.remove();
                 }
+
                 boolean classchanged = criteria.differs(oci, nci);
                 if (classchanged || !removedMethods.isEmpty()
                         || !removedFields.isEmpty() || !addedMethods.isEmpty()
                         || !addedFields.isEmpty() || !changedMethods.isEmpty()
                         || !changedFields.isEmpty()) {
                     handler.startClassChanged(s);
+
                     handler.startRemoved();
-                    j = removedFields.iterator();
-                    while (j.hasNext())
-                        handler
-                            .fieldRemoved((FieldInfo) oldFields.get(j.next()));
-                    j = removedMethods.iterator();
-                    while (j.hasNext())
-                        handler.methodRemoved((MethodInfo)
-                                oldMethods.get(j.next()));
+                    for (String field : removedFields) {
+                        handler.fieldRemoved(oldFields.get(field));
+                    }
+                    for (String method : removedMethods) {
+                        handler.methodRemoved(oldMethods.get(method));
+                    }
                     handler.endRemoved();
+
                     handler.startAdded();
-                    j = addedFields.iterator();
-                    while (j.hasNext())
-                        handler
-                            .fieldAdded((FieldInfo) newFields.get(j.next()));
-                    j = addedMethods.iterator();
-                    while (j.hasNext())
-                        handler.methodAdded((MethodInfo)
-                                newMethods.get(j.next()));
+                    for (String field : addedFields) {
+                        handler.fieldAdded(newFields.get(field));
+                    }
+                    for (String method : addedMethods) {
+                        handler.methodAdded(newMethods.get(method));
+                    }
                     handler.endAdded();
+
                     handler.startChanged();
                     if (classchanged) {
-			// Was only deprecated?
-			if (wasDeprecated(oci, nci)
-				&& !criteria.differs(cloneDeprecated(oci), nci))
-			    handler.classDeprecated(oci, nci);
-			else
-			    handler.classChanged(oci, nci);
+			            // Was only deprecated?
+			            if (wasDeprecated(oci, nci)
+				            && !criteria.differs(cloneDeprecated(oci), nci))
+			                handler.classDeprecated(oci, nci);
+			            else
+			                handler.classChanged(oci, nci);
                     }
-                    j = changedFields.iterator();
-		    while (j.hasNext()) {
-			Object tmp = j.next();
-			FieldInfo oldFieldInfo = (FieldInfo) oldFields.get(tmp);
-			FieldInfo newFieldInfo = (FieldInfo) newFields.get(tmp);
-			// Was only deprecated?
-			if (wasDeprecated(oldFieldInfo, newFieldInfo)
-				&& !criteria.differs(
-					cloneDeprecated(oldFieldInfo),
-					newFieldInfo))
-			    handler.fieldDeprecated(oldFieldInfo, newFieldInfo);
-			else
-			    handler.fieldChanged(oldFieldInfo, newFieldInfo);
-		    }
-                    j = changedMethods.iterator();
-                    while (j.hasNext()) {
-			Object tmp = j.next();
-			MethodInfo oldMethodInfo = (MethodInfo) oldMethods
-				.get(tmp);
-			MethodInfo newMethodInfo = (MethodInfo) newMethods
-				.get(tmp);
-			// Was only deprecated?
-			if (wasDeprecated(oldMethodInfo, newMethodInfo)
-				&& !criteria.differs(
-					cloneDeprecated(oldMethodInfo),
-					newMethodInfo))
-			    handler.methodDeprecated(oldMethodInfo,
-				    newMethodInfo);
-			else
-			    handler.methodChanged(oldMethodInfo, newMethodInfo);
+
+                    for (String field : changedFields) {
+                        FieldInfo oldFieldInfo = oldFields.get(field);
+                        FieldInfo newFieldInfo = newFields.get(field);
+                        // Was only deprecated?
+                        if (wasDeprecated(oldFieldInfo, newFieldInfo)
+                            && !criteria.differs(
+                                cloneDeprecated(oldFieldInfo),
+                                newFieldInfo))
+                            handler.fieldDeprecated(oldFieldInfo, newFieldInfo);
+                        else
+                            handler.fieldChanged(oldFieldInfo, newFieldInfo);
+                    }
+                    for (String method : changedMethods) {
+                        MethodInfo oldMethodInfo = oldMethods.get(method);
+                        MethodInfo newMethodInfo = newMethods.get(method);
+                        // Was only deprecated?
+                        if (wasDeprecated(oldMethodInfo, newMethodInfo)
+                            && !criteria.differs(
+                                cloneDeprecated(oldMethodInfo),
+                                newMethodInfo))
+                            handler.methodDeprecated(oldMethodInfo,
+                                newMethodInfo);
+                        else
+                            handler.methodChanged(oldMethodInfo, newMethodInfo);
                     }
                     handler.endChanged();
                     handler.endClassChanged();
+
                     removedMethods.clear();
                     removedFields.clear();
                     addedMethods.clear();
@@ -523,6 +493,7 @@ public class JarDiff
             }
         }
         handler.endChanged();
+
         handler.endDiff();
     }
 

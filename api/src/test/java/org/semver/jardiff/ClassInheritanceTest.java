@@ -15,19 +15,13 @@
  * limitations under the License.
  */
 package org.semver.jardiff;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.osjava.jardiff.ClassInfo;
-import org.osjava.jardiff.DiffCriteria;
-import org.osjava.jardiff.DiffHandler;
 import org.osjava.jardiff.JarDiff;
 import org.osjava.jardiff.SimpleDiffCriteria;
 import org.semver.Delta;
@@ -53,7 +47,7 @@ public class ClassInheritanceTest {
   }
 
   @Test
-  public void shouldInheritedMethodMatchImplementedMethod() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
+  public void shouldInheritedMethodMatchImplementedMethod() throws Exception {
     /**
      * The situation we are testing is as follows:
      * Abstract class InheritanceRoot is initially implemented directly by ClassA.
@@ -67,18 +61,12 @@ public class ClassInheritanceTest {
     Map<String, ClassInfo> oldClassInfoMap = new HashMap<String, ClassInfo>();
     Map<String, ClassInfo> newClassInfoMap = new HashMap<String, ClassInfo>();
     JarDiff jd = new JarDiff();
-    Method loadInfoMethod = JarDiff.class.getDeclaredMethod("loadClassInfo", ClassReader.class);
-    Method diffMethod = JarDiff.class.getDeclaredMethod("diff", DiffHandler.class, DiffCriteria.class,
-        String.class, String.class,
-        Map.class, Map.class);
-    diffMethod.setAccessible(true);
-    loadInfoMethod.setAccessible(true);
-    addClassInfo(oldClassInfoMap, ClassA.class, jd, loadInfoMethod);
-    addClassInfo(oldClassInfoMap, DirectDescendant.class, jd, loadInfoMethod);
-    addClassInfo(oldClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
-    addClassInfo(newClassInfoMap, ClassB.class, jd, loadInfoMethod);
-    addClassInfo(newClassInfoMap, DirectDescendant.class, jd, loadInfoMethod);
-    addClassInfo(newClassInfoMap, InheritanceRoot.class, jd, loadInfoMethod);
+    addClassInfo(oldClassInfoMap, ClassA.class, jd);
+    addClassInfo(oldClassInfoMap, DirectDescendant.class, jd);
+    addClassInfo(oldClassInfoMap, InheritanceRoot.class, jd);
+    addClassInfo(newClassInfoMap, ClassB.class, jd);
+    addClassInfo(newClassInfoMap, DirectDescendant.class, jd);
+    addClassInfo(newClassInfoMap, InheritanceRoot.class, jd);
 
     // Make B look like A
     ClassInfo a = oldClassInfoMap.get("org/semver/jardiff/ClassInheritanceTest$ClassA");
@@ -88,7 +76,7 @@ public class ClassInheritanceTest {
             b.getMethodMap(), b.getFieldMap()));
     newClassInfoMap.remove(b.getName());
     DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler();
-    diffMethod.invoke(jd, handler, new SimpleDiffCriteria(),
+    jd.diff(handler, new SimpleDiffCriteria(),
         "0.1.0", "0.2.0", oldClassInfoMap, newClassInfoMap);
 
     for (Delta.Difference d: handler.getDelta().getDifferences()) {
@@ -101,9 +89,8 @@ public class ClassInheritanceTest {
     Assert.assertEquals("differences found", 1, handler.getDelta().getDifferences().size());
   }
 
-  private void addClassInfo(Map<String, ClassInfo> classMap, Class klass, JarDiff jd,
-      Method loadInfoMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-    ClassInfo classInfo = (ClassInfo) loadInfoMethod.invoke(jd, new ClassReader(klass.getName()));
+  private void addClassInfo(Map<String, ClassInfo> classMap, Class klass, JarDiff jd) throws Exception {
+    ClassInfo classInfo = jd.loadClassInfo(new ClassReader(klass.getName()));
     classMap.put(classInfo.getName(), classInfo);
   }
 
