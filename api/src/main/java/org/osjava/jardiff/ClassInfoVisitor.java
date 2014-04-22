@@ -64,20 +64,20 @@ public class ClassInfoVisitor extends EmptyVisitor
     /**
      * A map of method signature to a MethodInfo describing the method.
      */
-    private Map methodMap;
+    private Map<String, MethodInfo> methodMap;
 
     /**
      * A map of field signature to a FieldInfo describing the field.
      */
-    private Map fieldMap;
+    private Map<String, FieldInfo> fieldMap;
     
     /**
      * Reset this ClassInfoVisitor so that it can be used to visit another
      * class.
      */
     public void reset() {
-        methodMap = new HashMap();
-        fieldMap = new HashMap();
+        methodMap = new HashMap<String, MethodInfo>();
+        fieldMap = new HashMap<String, FieldInfo>();
     }
     
     /**

@@ -43,7 +43,7 @@ public final class FieldInfo extends AbstractInfo
      *
      * @param access The access flags.
      * @param name The name of the field.
-     * @param desc The field discriptor.
+     * @param desc The field descriptor.
      * @param signature The signature of this field.
      * @param value The initial value of the field.
      */

@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 package org.osjava.jardiff;
+
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A specific type of DiffCriteria which is only true for classes, methods
@@ -79,9 +81,9 @@ public class SimpleDiffCriteria implements DiffCriteria
         } else if (!oldInfo.getSupername().equals(newInfo.getSupername())) {
             return true;
         }
-        java.util.Set oldInterfaces
+        Set<String> oldInterfaces
             = new HashSet(Arrays.asList(oldInfo.getInterfaces()));
-        java.util.Set newInterfaces
+        Set<String> newInterfaces
             = new HashSet(Arrays.asList(newInfo.getInterfaces()));
         if (!oldInterfaces.equals(newInterfaces))
             return true;
@@ -105,9 +107,9 @@ public class SimpleDiffCriteria implements DiffCriteria
             if (oldInfo.getExceptions() != newInfo.getExceptions())
                 return true;
         } else {
-            java.util.Set oldExceptions
+            Set<String> oldExceptions
                 = new HashSet(Arrays.asList(oldInfo.getExceptions()));
-            java.util.Set newExceptions
+            Set<String> newExceptions
                 = new HashSet(Arrays.asList(newInfo.getExceptions()));
             if (!oldExceptions.equals(newExceptions))
                 return true;

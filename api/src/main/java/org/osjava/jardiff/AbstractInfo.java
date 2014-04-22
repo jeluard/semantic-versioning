@@ -261,7 +261,7 @@ public abstract class AbstractInfo
      * Well, it probably shouldn't be set on a class as it would make
      * no sense, it only really makes sense on fields and methods.
      *
-     * @return true if it is vargargs.
+     * @return true if it is varargs.
      */
     public final boolean isVarargs() {
         return (this instanceof MethodInfo) && 
@@ -278,7 +278,7 @@ public abstract class AbstractInfo
     }
     
     /**
-     * Retrivie the access level for this class, method or field.
+     * Retrieve the access level for this class, method or field.
      *
      * @return the access level
      */

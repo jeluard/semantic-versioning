@@ -40,7 +40,7 @@ public final class ClassInfo extends AbstractInfo
     private String supername;
 
     /**
-     * An array of names of internal classnames of interfaces implmented 
+     * An array of names of internal classnames of interfaces implemented
      * by the class.
      */
     private String[] interfaces;
@@ -49,13 +49,13 @@ public final class ClassInfo extends AbstractInfo
      * A map of method signature to MethodInfo, for the methods provided 
      * by this class.
      */
-    private Map methodMap;
+    private Map<String, MethodInfo> methodMap;
 
     /**
      * A map of field signature to FieldInfo, for the fields provided by 
      * this class.
      */
-    private Map fieldMap;
+    private Map<String, FieldInfo> fieldMap;
     
     /**
      * Create a new classinfo.
@@ -70,8 +70,8 @@ public final class ClassInfo extends AbstractInfo
      * @param fieldMap a map of fields provided by this class.
      */
     public ClassInfo(int version, int access, String name, String signature,
-                     String supername, String[] interfaces, Map methodMap,
-                     Map fieldMap) {
+                     String supername, String[] interfaces, Map<String, MethodInfo> methodMap,
+                     Map<String, FieldInfo> fieldMap) {
         super(access, name);
         this.version = version;
         this.signature = signature;
@@ -122,7 +122,7 @@ public final class ClassInfo extends AbstractInfo
      *
      * @return a map with method signatures as keys, and MethodInfos as values.
      */
-    public final Map getMethodMap() {
+    public final Map<String, MethodInfo> getMethodMap() {
         return methodMap;
     }
     
@@ -131,7 +131,7 @@ public final class ClassInfo extends AbstractInfo
      *
      * @return a map with field signatures as keys, and FieldInfos as values.
      */
-    public final Map getFieldMap() {
+    public final Map<String, FieldInfo> getFieldMap() {
         return fieldMap;
     }
 }
