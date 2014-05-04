@@ -39,6 +39,9 @@ import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
+import org.osjava.jardiff.DiffCriteria;
+import org.osjava.jardiff.PublicDiffCriteria;
+import org.osjava.jardiff.SimpleDiffCriteria;
 import org.semver.Comparer;
 import org.semver.Delta;
 import org.semver.Dumper;
@@ -79,6 +82,13 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
      * @parameter
      */ 
     private boolean dumpDetails = false;
+
+    /**
+     * Check public members only
+     *
+     * @parameter
+     */
+    private boolean publicOnly = false;
     
     private Set<String> extractFilters(final String[] filtersAsStringArray) {
         if (filtersAsStringArray == null) {
@@ -149,7 +159,8 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         helper.getLog().info("Using <"+currentJar+"> as current JAR");
         
         try {
-            final Comparer comparer = new Comparer(previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+            final DiffCriteria diffCriteria = publicOnly ? new PublicDiffCriteria() : new SimpleDiffCriteria();
+            final Comparer comparer = new Comparer(diffCriteria, previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
             final Delta delta = comparer.diff();
 
             enforce(helper, delta, previous, current);

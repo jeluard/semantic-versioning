@@ -16,11 +16,12 @@
  */
 package org.semver;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import javax.annotation.concurrent.NotThreadSafe;
 
+import org.osjava.jardiff.DiffCriteria;
 import org.osjava.jardiff.DiffException;
 import org.osjava.jardiff.JarDiff;
 import org.osjava.jardiff.SimpleDiffCriteria;
@@ -34,19 +35,22 @@ import org.semver.jardiff.DifferenceAccumulatingHandler;
 @NotThreadSafe
 public class Comparer {
 
+    private final DiffCriteria diffCriteria;
     private final File previousJAR;
     private final File currentJAR;
     private final Set<String> includes;
     private final Set<String> excludes;
     
-    public Comparer(final File previousJAR, final File currentJAR, final Set<String> includes, final Set<String> excludes) {
+    public Comparer(final DiffCriteria diffCriteria, final File previousJAR, final File currentJAR,
+                    final Set<String> includes, final Set<String> excludes) {
         if (!previousJAR.isFile()) {
             throw new IllegalArgumentException("<"+previousJAR+"> is not a valid file");
         }
         if (!currentJAR.isFile()) {
             throw new IllegalArgumentException("<"+currentJAR+"> is not a valid file");
         }
-        
+
+        this.diffCriteria = diffCriteria;
         this.previousJAR = previousJAR;
         this.currentJAR = currentJAR;
         this.includes = includes;
@@ -63,7 +67,7 @@ public class Comparer {
             jarDiff.loadOldClasses(this.previousJAR);
             jarDiff.loadNewClasses(this.currentJAR);
             final DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler(this.includes, this.excludes);
-            jarDiff.diff(handler, new SimpleDiffCriteria());
+            jarDiff.diff(handler, diffCriteria);
             return handler.getDelta();
         } catch (DiffException e) {
             throw new RuntimeException(e);
