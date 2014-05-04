@@ -25,6 +25,9 @@ import java.util.Set;
 import de.tototec.cmdoption.CmdOption;
 import de.tototec.cmdoption.CmdlineParser;
 import de.tototec.cmdoption.CmdlineParserException;
+import org.osjava.jardiff.DiffCriteria;
+import org.osjava.jardiff.PublicDiffCriteria;
+import org.osjava.jardiff.SimpleDiffCriteria;
 
 /**
  * 
@@ -42,6 +45,9 @@ public class Main {
 
         @CmdOption(names = { "--check", "-c" }, conflictsWith = { "--diff", "--infer", "--validate" }, description = "Check the compatibility of two jars.")
         public boolean check;
+
+        @CmdOption(names = {"--publicOnly", "-p"}, description = "Checks public members only")
+        public boolean publicOnly;
 
         @CmdOption(names = { "--infer", "-i" }, requires = { "--base-version" }, conflictsWith = { "--diff", "--check",
                 "--validate" }, description = "Infer the version of the new jar based on the previous jar.")
@@ -101,8 +107,9 @@ public class Main {
             System.exit(0);
         }
 
-        final Comparer comparer = new Comparer(new File(config.baseJar), new File(config.newJar), config.includes,
-                config.excludes);
+        final DiffCriteria diffCriteria = config.publicOnly ? new PublicDiffCriteria() : new SimpleDiffCriteria();
+        final Comparer comparer = new Comparer(diffCriteria, new File(config.baseJar), new File(config.newJar),
+                config.includes, config.excludes);
         final Delta delta = comparer.diff();
 
         if (config.diff) {
