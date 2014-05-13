@@ -42,7 +42,7 @@ import org.semver.Delta.Remove;
  *
  */
 public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
-    
+    private static final boolean DEBUG = false;
     private String currentClassName;
     private final Set<String> includes;
     private final Set<String> excludes;
@@ -240,7 +240,17 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
      *
      * @return
      */
+    @SuppressWarnings("unused")
     protected boolean isClassConsidered( final String className ) {
+        // Fix case where class names are reported with '.'
+        final String className2 = className.replace('.', '/');
+        final boolean b = isClassConsideredImpl(className2);
+        if( DEBUG && !b ) {
+            System.err.println("dropped: "+className+" -> "+className2);
+        }
+        return b;
+    }
+    protected boolean isClassConsideredImpl( final String className ) {
          for ( String exclude : this.excludes ) {
              if ( exclude.contains( "/**/" ) ) {
                  exclude = exclude.replaceAll( "/\\*\\*/", "{0,1}**/" );
