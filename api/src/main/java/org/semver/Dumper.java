@@ -164,7 +164,6 @@ public class Dumper {
     }
 
     /**
-     *
      * Dumps on <code>out</code> all differences.
      *
      * @param differences
@@ -173,6 +172,16 @@ public class Dumper {
     public static void dump(final Delta delta, final PrintStream out) {
         final List<Difference> sortedDifferences = new LinkedList<Difference>(delta.getDifferences());
         Collections.sort(sortedDifferences);
+        dump(sortedDifferences, out);
+    }
+
+    /**
+     * Dumps on <code>out</code> all of the given sorted differences.
+     *
+     * @param sortedDifferences
+     * @param out
+     */
+    public static void dump(final List<Difference> sortedDifferences, final PrintStream out) {
         String currentClassName = "";
         for (final Difference difference : sortedDifferences) {
             if (!currentClassName.equals(difference.getClassName())) {
@@ -182,5 +191,4 @@ public class Dumper {
             currentClassName = difference.getClassName();
         }
     }
-
 }
