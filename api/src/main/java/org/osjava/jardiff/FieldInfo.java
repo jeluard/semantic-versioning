@@ -26,18 +26,18 @@ public final class FieldInfo extends AbstractInfo
     /**
      * The field descriptor for this field.
      */
-    private String desc;
-    
+    private final String desc;
+
     /**
      * The signature for this field.
      */
-    private String signature;
-    
+    private final String signature;
+
     /**
      * The initial value of this field.
      */
-    private Object value;
-    
+    private final Object value;
+
     /**
      * Create a new FieldInfo
      *
@@ -54,25 +54,17 @@ public final class FieldInfo extends AbstractInfo
         this.signature = signature;
         this.value = value;
     }
-    
-    /**
-     * Get the descriptor for this FieldInfo.
-     *
-     * @return The field descriptor.
-     */
+
+    @Override
     public final String getDesc() {
         return desc;
     }
-    
-    /**
-     * Get the signature for this fieldinfo.
-     *
-     * @return The signature.
-     */
+
+    @Override
     public final String getSignature() {
         return signature;
     }
-    
+
     /**
      * Get the initial value for this fieldinfo
      *

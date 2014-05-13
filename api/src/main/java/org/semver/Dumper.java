@@ -16,6 +16,7 @@
  */
 package org.semver;
 
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,13 +29,13 @@ import org.semver.Delta.Change;
 /**
  *
  * Helper methods to dump {@link Delta}.
- * 
+ *
  */
-public final class Dumper {
+public class Dumper {
 
     private Dumper() {
     }
-    
+
     protected static String extractActionType(final Difference difference) {
         final String actionType = difference.getClass().getSimpleName();
         return actionType.endsWith("e")?actionType+"d":actionType+"ed";
@@ -48,9 +49,9 @@ public final class Dumper {
     protected static String extractDetails(final Difference difference) {
         if (difference instanceof Change) {
             final Change change = (Change) difference;
-            return extractDetails(difference.getInfo())+" "+extractAccessDetails(difference.getInfo(), change.getModifiedInfo());
+            return extractDetails(difference.getInfo())+", access "+extractAccessDetails(difference.getInfo(), change.getModifiedInfo());
         } else {
-            return extractDetails(difference.getInfo());
+            return extractDetails(difference.getInfo())+", access "+extractAccessDetails(difference.getInfo());
         }
     }
 
@@ -58,10 +59,16 @@ public final class Dumper {
         final StringBuilder builder = new StringBuilder();
         if (!(info instanceof ClassInfo)) {
             builder.append(info.getName());
+            if( null != info.getSignature() ) {
+                builder.append(", sig ").append(info.getSignature());
+            }
+            if( null != info.getDesc() ) {
+                builder.append(", desc ").append(info.getDesc());
+            }
         }
         return builder.toString();
     }
-    
+
     protected static void accumulateAccessDetails(final String access, final boolean previousAccess, final boolean currentAccess, final List<String> added, final List<String> removed) {
         if (previousAccess != currentAccess) {
             if (previousAccess) {
@@ -71,7 +78,7 @@ public final class Dumper {
             }
         }
     }
-    
+
     protected static String extractAccessDetails(final AbstractInfo previousInfo, final AbstractInfo currentInfo) {
         final List<String> added = new LinkedList<String>();
         final List<String> removed = new LinkedList<String>();
@@ -105,28 +112,75 @@ public final class Dumper {
             details.append("removed: ");
             for (final String access : removed) {
                 details.append(access).append(" ");
-            }    
+            }
+        }
+        return details.toString().trim();
+    }
+
+    protected static void accumulateAccessDetails(final String access, final boolean hasAccess, final List<String> accessList) {
+        if (hasAccess) {
+            accessList.add(access);
+        }
+    }
+
+    protected static String extractAccessDetails(final AbstractInfo info) {
+        final List<String> accessList = new LinkedList<String>();
+        accumulateAccessDetails("abstract", info.isAbstract(), accessList);
+        accumulateAccessDetails("annotation", info.isAnnotation(), accessList);
+        accumulateAccessDetails("bridge", info.isBridge(), accessList);
+        accumulateAccessDetails("enum", info.isEnum(), accessList);
+        accumulateAccessDetails("final", info.isFinal(), accessList);
+        accumulateAccessDetails("interface", info.isInterface(), accessList);
+        accumulateAccessDetails("native", info.isNative(), accessList);
+        accumulateAccessDetails("package-private", info.isPackagePrivate(), accessList);
+        accumulateAccessDetails("private", info.isPrivate(), accessList);
+        accumulateAccessDetails("protected", info.isProtected(), accessList);
+        accumulateAccessDetails("public", info.isPublic(), accessList);
+        accumulateAccessDetails("static", info.isStatic(), accessList);
+        accumulateAccessDetails("strict", info.isStrict(), accessList);
+        accumulateAccessDetails("super", info.isSuper(), accessList);
+        accumulateAccessDetails("synchronized", info.isSynchronized(), accessList);
+        accumulateAccessDetails("synthetic", info.isSynthetic(), accessList);
+        accumulateAccessDetails("transcient", info.isTransient(), accessList);
+        accumulateAccessDetails("varargs", info.isVarargs(), accessList);
+        accumulateAccessDetails("volatile", info.isVolatile(), accessList);
+        final StringBuilder details = new StringBuilder();
+        if (!accessList.isEmpty()) {
+            for (final String access : accessList) {
+                details.append(access).append(" ");
+            }
         }
         return details.toString().trim();
     }
 
     /**
-     * 
+     *
      * Dumps on {@link System#out} all differences.
-     * 
+     *
      * @param differences
      */
     public static void dump(final Delta delta) {
+        dump(delta, System.out);
+    }
+
+    /**
+     *
+     * Dumps on <code>out</code> all differences.
+     *
+     * @param differences
+     * @param out
+     */
+    public static void dump(final Delta delta, final PrintStream out) {
         final List<Difference> sortedDifferences = new LinkedList<Difference>(delta.getDifferences());
         Collections.sort(sortedDifferences);
         String currentClassName = "";
         for (final Difference difference : sortedDifferences) {
             if (!currentClassName.equals(difference.getClassName())) {
-                System.out.println("Class "+difference.getClassName());
+                out.println("Class "+difference.getClassName());
             }
-            System.out.println(" "+extractActionType(difference)+" "+extractInfoType(difference.getInfo())+" "+extractDetails(difference));
+            out.println(" "+extractActionType(difference)+" "+extractInfoType(difference.getInfo())+" "+extractDetails(difference));
             currentClassName = difference.getClassName();
         }
     }
-    
+
 }
