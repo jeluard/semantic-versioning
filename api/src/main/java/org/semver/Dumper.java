@@ -17,9 +17,14 @@
 package org.semver;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.osjava.jardiff.AbstractInfo;
 import org.osjava.jardiff.ClassInfo;
@@ -155,18 +160,18 @@ public class Dumper {
 
     /**
      *
-     * Dumps on {@link System#out} all differences.
+     * Dumps on {@link System#out} all differences, sorted by class name.
      *
-     * @param differences
+     * @param delta the delta to be dumped
      */
     public static void dump(final Delta delta) {
         dump(delta, System.out);
     }
 
     /**
-     * Dumps on <code>out</code> all differences.
+     * Dumps on <code>out</code> all differences, sorted by class name.
      *
-     * @param differences
+     * @param delta the delta to be dumped
      * @param out
      */
     public static void dump(final Delta delta, final PrintStream out) {
@@ -178,8 +183,8 @@ public class Dumper {
     /**
      * Dumps on <code>out</code> all of the given sorted differences.
      *
-     * @param sortedDifferences
-     * @param out
+     * @param sortedDifferences the sorted differences to be dumped
+     * @param out the print output stream
      */
     public static void dump(final List<Difference> sortedDifferences, final PrintStream out) {
         String currentClassName = "";
@@ -191,4 +196,101 @@ public class Dumper {
             currentClassName = difference.getClassName();
         }
     }
+
+    /**
+     * Dumps on <code>out</code> all differences separated by its type in the order
+     * <code>remove</code>, <code>change</code>, <code>deprecate</code> and <code>add</code>.
+     * <p>
+     * Prepends statistics per class regarding difference type.
+     * </p>
+     * @param delta the delta to be dumped
+     * @param iwidth the integer width for formated integer counter
+     * @param out the print output stream
+     */
+    public static void dumpFullStats(final Delta delta, final int iwidth, final PrintStream out) {
+        final Set<Difference> diffs = delta.getDifferences();
+
+        final List<Difference> diffsAdd = new ArrayList<Difference>();
+        final List<Difference> diffsChange = new ArrayList<Difference>();
+        final List<Difference> diffsDeprecate = new ArrayList<Difference>();
+        final List<Difference> diffsRemove = new ArrayList<Difference>();
+        final Map<String, DiffCount> className2DiffCount = new HashMap<String, DiffCount>();
+
+        int maxClassNameLen = 0;
+
+        for(final Iterator<Difference> iter = diffs.iterator(); iter.hasNext(); ) {
+            final Difference diff = iter.next();
+            final String className = diff.getClassName();
+            maxClassNameLen = Math.max(maxClassNameLen, className.length());
+
+            DiffCount dc = className2DiffCount.get(className);
+            if( null == dc ) {
+                dc = new DiffCount(className);
+                className2DiffCount.put(className, dc);
+            }
+
+            if( diff instanceof Delta.Add ) {
+                diffsAdd.add(diff);
+                dc.additions++;
+            } else if( diff instanceof Delta.Change ) {
+                diffsChange.add(diff);
+                dc.changes++;
+            } else if( diff instanceof Delta.Deprecate ) {
+                diffsDeprecate.add(diff);
+                dc.deprecates++;
+            } else if( diff instanceof Delta.Remove ) {
+                diffsRemove.add(diff);
+                dc.removes++;
+            }
+        }
+        Collections.sort(diffsAdd);
+        Collections.sort(diffsChange);
+        Collections.sort(diffsDeprecate);
+        Collections.sort(diffsRemove);
+
+        final List<String> classNames = new ArrayList<String>(className2DiffCount.keySet());
+        Collections.sort(classNames);
+
+        System.err.println("Summary: "+diffs.size()+" differences in "+classNames.size()+" classes:");
+        System.err.println("  Remove "+diffsRemove.size()+
+                           ", Change "+diffsChange.size()+
+                           ", Deprecate "+diffsDeprecate.size()+
+                           ", Add "+diffsAdd.size());
+        System.err.printf("%n");
+
+        int iterI = 0;
+        for(final Iterator<String> iter = classNames.iterator(); iter.hasNext(); iterI++) {
+            final String className = iter.next();
+            final DiffCount dc = className2DiffCount.get(className);
+            System.err.printf("%"+iwidth+"d/%"+iwidth+"d: %-"+maxClassNameLen+"s: %s%n", iterI, classNames.size(), className, dc.format(iwidth));
+        }
+
+        System.err.printf("%n%nRemoves%n%n");
+        dump(diffsRemove, System.err);
+
+        System.err.printf("%n%nChanges%n%n");
+        dump(diffsChange, System.err);
+
+        System.err.printf("%n%nDeprecates%n%n");
+        dump(diffsDeprecate, System.err);
+
+        System.err.printf("%n%nAdditions%n%n");
+        dump(diffsAdd, System.err);
+        System.err.printf("%n%n");
+    }
+
+    static class DiffCount {
+        public DiffCount(String name) { this.name = name; }
+        public final String name;
+        public int removes;
+        public int changes;
+        public int deprecates;
+        public int additions;
+        public String toString() { return name+": Remove "+removes+", Change "+changes+", Deprecate "+deprecates+", Add "+additions; }
+        public String format(final int iwidth) {
+            return String.format("Remove %"+iwidth+"d, Change %"+iwidth+"d, Deprecate %"+iwidth+"d, Add %"+iwidth+"d",
+                                    removes, changes, deprecates, additions);
+        }
+    }
+
 }
