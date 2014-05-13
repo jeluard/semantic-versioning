@@ -24,13 +24,12 @@ import java.util.Set;
 import org.osjava.jardiff.DiffCriteria;
 import org.osjava.jardiff.DiffException;
 import org.osjava.jardiff.JarDiff;
-import org.osjava.jardiff.SimpleDiffCriteria;
 import org.semver.jardiff.DifferenceAccumulatingHandler;
 
 /**
- * 
+ *
  * Allows to compare content of JARs.
- * 
+ *
  */
 @NotThreadSafe
 public class Comparer {
@@ -39,10 +38,17 @@ public class Comparer {
     private final File previousJAR;
     private final File currentJAR;
     private final Set<String> includes;
+    private final boolean includesAreRegExp;
     private final Set<String> excludes;
-    
+    private final boolean excludesAreRegExp;
+
     public Comparer(final DiffCriteria diffCriteria, final File previousJAR, final File currentJAR,
                     final Set<String> includes, final Set<String> excludes) {
+        this(diffCriteria, previousJAR, currentJAR, includes, false, excludes, false);
+    }
+
+    public Comparer(final DiffCriteria diffCriteria, final File previousJAR, final File currentJAR,
+                    final Set<String> includes, final boolean includesAreRegExp, final Set<String> excludes, final boolean excludesAreRegExp) {
         if (!previousJAR.isFile()) {
             throw new IllegalArgumentException("<"+previousJAR+"> is not a valid file");
         }
@@ -54,19 +60,21 @@ public class Comparer {
         this.previousJAR = previousJAR;
         this.currentJAR = currentJAR;
         this.includes = includes;
+        this.includesAreRegExp = includesAreRegExp;
         this.excludes = excludes;
+        this.excludesAreRegExp = excludesAreRegExp;
     }
 
     /**
      * @return all {@link Difference} between both JARs
      * @throws IOException
      */
-    public final Delta diff() throws IOException {        
+    public final Delta diff() throws IOException {
         try {
             final JarDiff jarDiff = new JarDiff();
             jarDiff.loadOldClasses(this.previousJAR);
             jarDiff.loadNewClasses(this.currentJAR);
-            final DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler(this.includes, this.excludes);
+            final DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler(this.includes, this.includesAreRegExp, this.excludes, this.excludesAreRegExp);
             jarDiff.diff(handler, diffCriteria);
             return handler.getDelta();
         } catch (DiffException e) {

@@ -42,10 +42,12 @@ import org.semver.Delta.Remove;
  *
  */
 public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
-    
+    private static final boolean DEBUG = false;
     private String currentClassName;
     private final Set<String> includes;
+    private final boolean includesAreRegExp;
     private final Set<String> excludes;
+    private final boolean excludesAreRegExp;
     private final Set<Difference> differences = new HashSet<Difference>();
 
     public DifferenceAccumulatingHandler() {
@@ -53,14 +55,20 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
     }
 
     public DifferenceAccumulatingHandler(@Nonnull final Set<String> includes, @Nonnull final Set<String> excludes) {
+        this(includes, false, excludes, false);
+    }
+    public DifferenceAccumulatingHandler(@Nonnull final Set<String> includes, final boolean includesAreRegExp,
+                                         @Nonnull final Set<String> excludes, final boolean excludesAreRegExp) {
         this.includes = includes;
+        this.includesAreRegExp = includesAreRegExp;
         this.excludes = excludes;
+        this.excludesAreRegExp = excludesAreRegExp;
     }
 
     public String getCurrentClassName() {
         return this.currentClassName;
     }
-    
+
     @Override
     public void startDiff(final String previous, final String current) throws DiffException {
     }
@@ -240,48 +248,67 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
      *
      * @return
      */
+    @SuppressWarnings("unused")
     protected boolean isClassConsidered( final String className ) {
+        // Fix case where class names are reported with '.'
+        final String className2 = className.replace('.', '/');
+        final boolean b = isClassConsideredImpl(className2);
+        if( DEBUG && !b ) {
+            System.err.println("dropped: "+className+" -> "+className2);
+        }
+        return b;
+    }
+    protected boolean isClassConsideredImpl( final String className ) {
          for ( String exclude : this.excludes ) {
-             if ( exclude.contains( "/**/" ) ) {
-                 exclude = exclude.replaceAll( "/\\*\\*/", "{0,1}**/" );
+             final Pattern excludePattern;
+             if( !excludesAreRegExp ) {
+                 if ( exclude.contains( "/**/" ) ) {
+                     exclude = exclude.replaceAll( "/\\*\\*/", "{0,1}**/" );
+                 }
+                 if ( exclude.contains( "/*/" ) ) {
+                     exclude = exclude.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
+                 }
+                 excludePattern = simplifyRegularExpression( exclude, false );
+             } else {
+                 excludePattern = Pattern.compile( exclude );
              }
-             if ( exclude.contains( "/*/" ) ) {
-                 exclude = exclude.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
-             }
-             Pattern excludePattern = simplifyRegularExpression( exclude, false );
- 
-             Matcher excludeMatcher = excludePattern.matcher( className );
- 
+             final Matcher excludeMatcher = excludePattern.matcher( className );
+
              while ( excludeMatcher.find() ) {
                   return false;
-              }
-          }
+             }
+         }
          if ( !this.includes.isEmpty() ) {
              for ( String include : this.includes ) {
-                 if ( include.contains( "/**/" ) ) {
-                     include = include.replaceAll( "/\\*\\*/", "{0,1}**/" );
+                 final Pattern includePattern;
+                 if( !includesAreRegExp ) {
+                     if ( include.contains( "/**/" ) ) {
+                         include = include.replaceAll( "/\\*\\*/", "{0,1}**/" );
+                     }
+                     if ( include.contains( "/*/" ) ) {
+                         include = include.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
+                     }
+                     includePattern = simplifyRegularExpression( include, false );
+                 } else {
+                     includePattern = Pattern.compile( include );
                  }
-                 if ( include.contains( "/*/" ) ) {
-                     include = include.replaceAll( "/\\*/", "{0,1}*/{0,1}" );
-                 }
-                 Pattern includePattern = simplifyRegularExpression( include, false );
-                 Matcher includeMatcher = includePattern.matcher( className );
- 
+                 final Matcher includeMatcher = includePattern.matcher( className );
+
                  while ( includeMatcher.find() ) {
                      return false;
-                  }
+                 }
               }
           }
           return true;
       }
-	  
+
 	  /**
-      * 
+      *
       * Simplifies the given regular expression by the following pattern:<br>
       * All substrings not containing "{0,1}", "*" and "?" get surrounded by "\\Q" and "\\E". Then all occurrences of
       * "**" are replaced by ".*", "*" with "[^/]*" and all occurrences of "?" are replaced by "." In the end a "$" will
       * be appended.
-      * 
+      *
       * @param regEx the regular expression which is in a simple form.
       * @return the simple regular expression converted to a normal regular expression.
       */
@@ -289,7 +316,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
          final StringBuilder strBuild = new StringBuilder();
          final Pattern p = Pattern.compile( "\\{0,1\\}|\\*|\\?|[[^*^?^{^}]|^]+", Pattern.CASE_INSENSITIVE );
          final Matcher m = p.matcher( regEx );
- 
+
          while ( m.find() ) {
              final String token = m.group();
              if ( token.equals( "*" ) || token.equals( "?" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
