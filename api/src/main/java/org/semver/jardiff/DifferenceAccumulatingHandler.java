@@ -42,7 +42,6 @@ import org.semver.Delta.Remove;
  *
  */
 public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
-    private static final boolean DEBUG = false;
     private String currentClassName;
     private final Set<String> includes;
     private final boolean includesAreRegExp;
@@ -248,17 +247,9 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
      *
      * @return
      */
-    @SuppressWarnings("unused")
     protected boolean isClassConsidered( final String className ) {
-        // Fix case where class names are reported with '.'
-        final String className2 = className.replace('.', '/');
-        final boolean b = isClassConsideredImpl(className2);
-        if( DEBUG && !b ) {
-            System.err.println("dropped: "+className+" -> "+className2);
-        }
-        return b;
-    }
-    protected boolean isClassConsideredImpl( final String className ) {
+         // Fix case where class names are reported with '.'
+         final String fixedClassName = className.replace('.', '/');
          for ( String exclude : this.excludes ) {
              final Pattern excludePattern;
              if( !excludesAreRegExp ) {
@@ -272,7 +263,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
              } else {
                  excludePattern = Pattern.compile( exclude );
              }
-             final Matcher excludeMatcher = excludePattern.matcher( className );
+             final Matcher excludeMatcher = excludePattern.matcher( fixedClassName );
 
              while ( excludeMatcher.find() ) {
                   return false;
@@ -292,7 +283,7 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
                  } else {
                      includePattern = Pattern.compile( include );
                  }
-                 final Matcher includeMatcher = includePattern.matcher( className );
+                 final Matcher includeMatcher = includePattern.matcher( fixedClassName );
 
                  while ( includeMatcher.find() ) {
                      return false;
