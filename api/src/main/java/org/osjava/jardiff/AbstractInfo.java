@@ -26,13 +26,13 @@ import org.objectweb.asm.Opcodes;
 public abstract class AbstractInfo
 {
     /**
-     * The string used to represent a class, method or field with public 
+     * The string used to represent a class, method or field with public
      * access.
      */
     public final String ACCESS_PUBLIC = "public";
-    
+
     /**
-     * The string used to represent a class, method or field with protected 
+     * The string used to represent a class, method or field with protected
      * access.
      */
     public final String ACCESS_PROTECTED = "protected";
@@ -55,12 +55,12 @@ public abstract class AbstractInfo
      * The access flags for this class, method or field.
      */
     private final int access;
-    
+
     /**
      * The internal name of this class, method or field.
      */
     private final String name;
-    
+
     /**
      * Construct a new AbstractInfo with the specified access and name.
      *
@@ -71,7 +71,21 @@ public abstract class AbstractInfo
         this.access = access;
         this.name = name;
     }
-    
+
+    /**
+     * Get the descriptor
+     *
+     * @return The descriptor.
+     */
+    public abstract String getDesc();
+
+    /**
+     * Get the signature
+     *
+     * @return The signature.
+     */
+    public abstract String getSignature();
+
     /**
      * Get the access flags for this class, method or field.
      *
@@ -80,7 +94,7 @@ public abstract class AbstractInfo
     public final int getAccess() {
         return access;
     }
-    
+
     /**
      * Get the internal name of this class, method or field.
      *
@@ -89,7 +103,7 @@ public abstract class AbstractInfo
     public final String getName() {
         return name;
     }
-    
+
     /**
      * Test if this class, method or field is public.
      *
@@ -98,7 +112,7 @@ public abstract class AbstractInfo
     public final boolean isPublic() {
         return (access & Opcodes.ACC_PUBLIC) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is protected.
      *
@@ -107,17 +121,17 @@ public abstract class AbstractInfo
     public final boolean isProtected() {
         return (access & Opcodes.ACC_PROTECTED) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is package private.
      *
      * @return true if it is package private.
      */
     public final boolean isPackagePrivate() {
-        return (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | 
+        return (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED |
                     Opcodes.ACC_PRIVATE)) == 0;
     }
-    
+
     /**
      * Test if this class, method or field is private.
      *
@@ -126,7 +140,7 @@ public abstract class AbstractInfo
     public final boolean isPrivate() {
         return (access & Opcodes.ACC_PRIVATE) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is abstract.
      *
@@ -135,7 +149,7 @@ public abstract class AbstractInfo
     public final boolean isAbstract() {
         return (access & Opcodes.ACC_ABSTRACT) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is annotation
      *
@@ -144,7 +158,7 @@ public abstract class AbstractInfo
     public final boolean isAnnotation() {
         return (access & Opcodes.ACC_ANNOTATION) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is a bridge
      *
@@ -153,7 +167,7 @@ public abstract class AbstractInfo
     public final boolean isBridge() {
         return (access & Opcodes.ACC_BRIDGE) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is deprecated.
      *
@@ -162,7 +176,7 @@ public abstract class AbstractInfo
     public final boolean isDeprecated() {
         return (access & Opcodes.ACC_DEPRECATED) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is an enum.
      *
@@ -171,7 +185,7 @@ public abstract class AbstractInfo
     public final boolean isEnum() {
         return (access & Opcodes.ACC_ENUM) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is final.
      *
@@ -180,7 +194,7 @@ public abstract class AbstractInfo
     public final boolean isFinal() {
         return (access & Opcodes.ACC_FINAL) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is an interface.
      *
@@ -189,7 +203,7 @@ public abstract class AbstractInfo
     public final boolean isInterface() {
         return (access & Opcodes.ACC_INTERFACE) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is native.
      *
@@ -198,7 +212,7 @@ public abstract class AbstractInfo
     public final boolean isNative() {
         return (access & Opcodes.ACC_NATIVE) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is static.
      *
@@ -207,7 +221,7 @@ public abstract class AbstractInfo
     public final boolean isStatic() {
         return (access & Opcodes.ACC_STATIC) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is string.
      *
@@ -216,7 +230,7 @@ public abstract class AbstractInfo
     public final boolean isStrict() {
         return (access & Opcodes.ACC_STRICT) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is super.
      *
@@ -225,7 +239,7 @@ public abstract class AbstractInfo
     public final boolean isSuper() {
         return (access & Opcodes.ACC_SUPER) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is synchronized.
      *
@@ -234,7 +248,7 @@ public abstract class AbstractInfo
     public final boolean isSynchronized() {
         return (access & Opcodes.ACC_SYNCHRONIZED) != 0;
     }
-    
+
     /**
      * Test if this class, method or field is synthetic.
      *
@@ -243,7 +257,7 @@ public abstract class AbstractInfo
     public final boolean isSynthetic() {
         return (access & Opcodes.ACC_SYNTHETIC) != 0;
     }
-    
+
     /**
      * Test if this class or field is transient.
      * If this flag is set on a method it means something different.
@@ -254,7 +268,7 @@ public abstract class AbstractInfo
         return !(this instanceof MethodInfo) &&
             ((access & Opcodes.ACC_TRANSIENT) != 0);
     }
-    
+
     /**
      * Test if this method is varargs.
      * If this flag is set on a class or field it means something different.
@@ -264,19 +278,19 @@ public abstract class AbstractInfo
      * @return true if it is varargs.
      */
     public final boolean isVarargs() {
-        return (this instanceof MethodInfo) && 
+        return (this instanceof MethodInfo) &&
             ((access & Opcodes.ACC_VARARGS) != 0);
     }
-    
+
     /**
      * Test if this class, method or field is volatile.
-     * 
+     *
      * @return true if it is volatile.
      */
     public final boolean isVolatile() {
         return (access & Opcodes.ACC_VOLATILE) != 0;
     }
-    
+
     /**
      * Retrieve the access level for this class, method or field.
      *

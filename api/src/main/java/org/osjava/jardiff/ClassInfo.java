@@ -27,36 +27,36 @@ public final class ClassInfo extends AbstractInfo
     /**
      * The classfile version number.
      */
-    private int version;
+    private final int version;
 
     /**
      * The class signature.
      */
-    private String signature;
+    private final String signature;
 
     /**
      * The internal classname of the superclass.
      */
-    private String supername;
+    private final String supername;
 
     /**
      * An array of names of internal classnames of interfaces implemented
      * by the class.
      */
-    private String[] interfaces;
+    private final String[] interfaces;
 
     /**
-     * A map of method signature to MethodInfo, for the methods provided 
+     * A map of method signature to MethodInfo, for the methods provided
      * by this class.
      */
-    private Map<String, MethodInfo> methodMap;
+    private final Map<String, MethodInfo> methodMap;
 
     /**
-     * A map of field signature to FieldInfo, for the fields provided by 
+     * A map of field signature to FieldInfo, for the fields provided by
      * this class.
      */
-    private Map<String, FieldInfo> fieldMap;
-    
+    private final Map<String, FieldInfo> fieldMap;
+
     /**
      * Create a new classinfo.
      *
@@ -80,7 +80,7 @@ public final class ClassInfo extends AbstractInfo
         this.methodMap = methodMap;
         this.fieldMap = fieldMap;
     }
-    
+
     /**
      * Get the class file version.
      *
@@ -89,16 +89,17 @@ public final class ClassInfo extends AbstractInfo
     public final int getVersion() {
         return version;
     }
-    
-    /**
-     * Get the class signature.
-     *
-     * @return the class signature
-     */
+
+    @Override
+    public final String getDesc() {
+        return null;
+    }
+
+    @Override
     public final String getSignature() {
         return signature;
     }
-    
+
     /**
      * Get the internal name of the superclass.
      *
@@ -107,7 +108,7 @@ public final class ClassInfo extends AbstractInfo
     public final String getSupername() {
         return supername;
     }
-    
+
     /**
      * Get the internal names of the interfaces implemented by this class
      *
@@ -116,7 +117,7 @@ public final class ClassInfo extends AbstractInfo
     public final String[] getInterfaces() {
         return interfaces;
     }
-    
+
     /**
      * Get the map of method signatures to methods.
      *
@@ -125,7 +126,7 @@ public final class ClassInfo extends AbstractInfo
     public final Map<String, MethodInfo> getMethodMap() {
         return methodMap;
     }
-    
+
     /**
      * Get the map of field signatures to fields.
      *

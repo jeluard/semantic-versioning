@@ -26,18 +26,18 @@ public final class MethodInfo extends AbstractInfo
     /**
      * The method descriptor.
      */
-    private String desc;
+    private final String desc;
 
     /**
      * The signature of the method.
      */
-    private String signature;
+    private final String signature;
 
     /**
      * An array of the exceptions thrown by this method.
      */
-    private String[] exceptions;
-    
+    private final String[] exceptions;
+
     /**
      * Create a new MethodInfo with the specified parameters.
      *
@@ -53,25 +53,17 @@ public final class MethodInfo extends AbstractInfo
         this.signature = signature;
         this.exceptions = exceptions;
     }
-    
-    /**
-     * Get the descriptor for the method.
-     *
-     * @return the descriptor
-     */
+
+    @Override
     public final String getDesc() {
         return desc;
     }
-    
-    /**
-     * Get the signature for the method.
-     *
-     * @return the signature
-     */
+
+    @Override
     public final String getSignature() {
         return signature;
     }
-    
+
     /**
      * Get the array of exceptions which can be thrown by the method.
      *
