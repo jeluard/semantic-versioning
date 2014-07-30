@@ -71,7 +71,7 @@ public class SimpleDiffCriteria implements DiffCriteria
      * @return True if the classes differ, false otherwise.
      */
     public boolean differs(ClassInfo oldInfo, ClassInfo newInfo) {
-        if (oldInfo.getAccess() != newInfo.getAccess())
+        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         // Yes classes can have a null supername, e.g. java.lang.Object !
         if(oldInfo.getSupername() == null) {
@@ -100,7 +100,7 @@ public class SimpleDiffCriteria implements DiffCriteria
      * @return True if the methods differ, false otherwise.
      */
     public boolean differs(MethodInfo oldInfo, MethodInfo newInfo) {
-        if (oldInfo.getAccess() != newInfo.getAccess())
+        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         if (oldInfo.getExceptions() == null
             || newInfo.getExceptions() == null) {
@@ -127,7 +127,7 @@ public class SimpleDiffCriteria implements DiffCriteria
      * @return True if the fields differ, false otherwise.
      */
     public boolean differs(FieldInfo oldInfo, FieldInfo newInfo) {
-        if (oldInfo.getAccess() != newInfo.getAccess())
+        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         if (oldInfo.getValue() == null || newInfo.getValue() == null) {
             if (oldInfo.getValue() != newInfo.getValue())
