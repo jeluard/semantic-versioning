@@ -16,6 +16,8 @@
  */
 package org.osjava.jardiff;
 
+import org.objectweb.asm.Opcodes;
+
 /**
  * A set of Tools which do not belong anywhere else in the API at this time.
  * This is nasty, but for now, useful.
@@ -54,5 +56,22 @@ public final class Tools
             }
         }
         return ret.toString();
+    }
+
+    /**
+     * Returns whether newAccess is incompatible with oldAccess
+     *
+     * @param oldAccess
+     * @param newAccess
+     * @return
+     */
+    public static boolean isAccessChange(int oldAccess, int newAccess) {
+        if ((oldAccess & Opcodes.ACC_FINAL) == 0 && (newAccess & Opcodes.ACC_FINAL) > 0) {
+            return true;
+        } else {
+            oldAccess = oldAccess & ~Opcodes.ACC_FINAL;
+            newAccess = newAccess & ~Opcodes.ACC_FINAL;
+        }
+        return oldAccess != newAccess;
     }
 }
