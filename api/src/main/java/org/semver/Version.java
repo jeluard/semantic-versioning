@@ -125,11 +125,23 @@ public final class Version implements Comparable<Version> {
 
         switch (element) {
             case MAJOR:
-                return new Version(this.major+1, 0, 0);
+              if (special == null || this.minor != 0 || this.patch != 0) {
+                return new Version(this.major + 1, 0, 0);
+              } else {
+                return new Version(this.major, 0, 0);
+              }
             case MINOR:
-                return new Version(this.major, this.minor+1, 0);
+              if (special == null || this.patch != 0) {
+                return new Version(this.major, this.minor + 1, 0);
+              } else {
+                return new Version(this.major, this.minor, 0);
+              }
             case PATCH:
-                return new Version(this.major, this.minor, this.patch+1);
+              if (special == null) {
+                return new Version(this.major, this.minor, this.patch + 1);
+              } else {
+                return new Version(this.major, this.minor, this.patch);
+              }
             default:
                 throw new IllegalArgumentException("Unknown element <"+element+">");
         }

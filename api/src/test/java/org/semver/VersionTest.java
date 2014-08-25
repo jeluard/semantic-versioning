@@ -143,6 +143,25 @@ public class VersionTest {
         Assert.assertEquals(version.next(Version.Element.PATCH), new Version(major, minor, patch+1));
     }
 
+    @Test
+    public void nextFromPre() {
+        final Version version1 = new Version(1, 0, 0, "-", "rc1");
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.PATCH));
+
+        final Version version2 = new Version(1, 1, 0, "-", "rc1");
+        Assert.assertEquals(new Version(2, 0, 0), version2.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 1, 0), version2.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 1, 0), version2.next(Version.Element.PATCH));
+
+        final Version version3 = new Version(1, 1, 1, "-", "rc1");
+        Assert.assertEquals(new Version(2, 0, 0), version3.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 2, 0), version3.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 1, 1), version3.next(Version.Element.PATCH));
+    }
+
+
     @Test(expected=IllegalArgumentException.class)
     public void shouldNextWithNullComparisonTypeFail() {
         final int major = 1;
