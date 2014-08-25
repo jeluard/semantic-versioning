@@ -18,6 +18,7 @@ package org.semver;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,7 +29,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  *
  * Version following semantic defined by <a href="http://semver.org/">Semantic Versioning</a> document.
- * 
+ *
  */
 @Immutable
 public final class Version implements Comparable<Version> {
@@ -43,13 +44,15 @@ public final class Version implements Comparable<Version> {
     private static final String FORMAT = "(\\d+)\\.(\\d+)(?:\\.)?(\\d*)(\\.|-|\\+)?([0-9A-Za-z-.]*)?";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
+    private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
+
     private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
 
     private final int major;
     private final int minor;
     private final int patch;
     private final String separator;
-    private final String special;
+    private final Special special;
 
     public Version(@Nonnegative final int major, @Nonnegative final int minor, @Nonnegative final int patch) {
         this(major, minor, patch, null, null);
@@ -70,7 +73,18 @@ public final class Version implements Comparable<Version> {
         this.minor = minor;
         this.patch = patch;
         this.separator = separator;
-        this.special = special;
+        this.special = parseSpecial(special);
+    }
+
+    private Special parseSpecial(String specialString) {
+      if (specialString == null) {
+        return null;
+      }
+      Special special = new Special(specialString);
+      if (special.ids.length == 0) {
+        return null;
+      }
+      return special;
     }
 
     /**
@@ -99,7 +113,7 @@ public final class Version implements Comparable<Version> {
         final String special = matcher.group(5);
         return new Version(major, minor, patch, separator, "".equals(special) ? null : special);
     }
-    
+
     /**
      * @param type
      * @return next {@link Version} regarding specified {@link Version.Element}
@@ -130,7 +144,7 @@ public final class Version implements Comparable<Version> {
     }
 
     public boolean isSnapshot() {
-        return this.special != null && this.special.endsWith(Version.SNAPSHOT_VERSION_SUFFIX);
+        return this.special != null && this.special.isSnapshot();
     }
 
     @Override
@@ -156,6 +170,136 @@ public final class Version implements Comparable<Version> {
         return (this.special == null) ? other.special == null : this.special.equals(other.special);
     }
 
+
+    private static SpecialId parseSpecialId(String id) {
+      Matcher matcher = DIGITS_ONLY.matcher(id);
+      if (matcher.matches()) {
+        return new IntId(Integer.parseInt(id));
+      } else {
+        return new StringId(id);
+      }
+    }
+
+    abstract private static class SpecialId implements Comparable<SpecialId> {
+
+      abstract public boolean isSnapshot();
+
+      abstract public int compareTo(IntId other);
+      abstract public int compareTo(StringId other);
+    }
+
+    private static class StringId extends SpecialId {
+      private final String id;
+      private StringId(String id) {
+        this.id = id;
+      }
+      @Override
+      public boolean isSnapshot() {
+        return id.endsWith(SNAPSHOT_VERSION_SUFFIX);
+      }
+
+      @Override
+      public int compareTo(SpecialId other) {
+        return - other.compareTo(this);
+      }
+
+      @Override
+      public String toString() {
+        return id;
+      }
+      @Override
+      public int compareTo(IntId other) {
+        // Numeric identifiers always have lower precedence than non-numeric identifiers.
+        return 1;
+      }
+      @Override
+      public int compareTo(StringId other) {
+        return id.compareTo(other.id);
+      }
+    }
+
+    private static class IntId extends SpecialId {
+      private final int id;
+      public IntId(int id) {
+        this.id = id;
+      }
+      @Override
+      public boolean isSnapshot() {
+        return false;
+      }
+
+      @Override
+      public String toString() {
+        return String.valueOf(id);
+      }
+      @Override
+      public int compareTo(SpecialId other) {
+        return - other.compareTo(this);
+      }
+
+      @Override
+      public int compareTo(IntId other) {
+        return id - other.id;
+      }
+      @Override
+      public int compareTo(StringId other) {
+        //Numeric identifiers always have lower precedence than non-numeric identifiers.
+        return -1;
+      }
+    }
+
+    private static class Special implements Comparable<Special> {
+      private final SpecialId[] ids;
+      Special(String s) {
+        String[] split = s.split("\\.");
+        ids = new SpecialId[split.length];
+        for (int i = 0; i < split.length; i++) {
+          ids[i] = parseSpecialId(split[i]);
+        }
+      }
+
+      public SpecialId last() {
+        return ids[ids.length - 1];
+      }
+
+      public boolean isSnapshot() {
+        return last().isSnapshot();
+      }
+
+      @Override
+      public int compareTo(Special other) {
+        int min = Math.min(other.ids.length, ids.length);
+        for (int i = 0; i < min; i++) {
+          int c = ids[i].compareTo(other.ids[i]);
+          if (c != 0) {
+            return c;
+          }
+        }
+        int max = Math.max(other.ids.length, ids.length);
+        if (max != min) {
+          if (ids.length > other.ids.length) {
+            return 1;
+          } else {
+            return -1;
+          }
+        }
+        return 0;
+      }
+
+      @Override
+      public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < ids.length; i++) {
+          SpecialId s = ids[i];
+          if (i != 0) {
+            builder.append(".");
+          }
+          builder.append(s);
+        }
+        return builder.toString();
+      }
+    }
+
     @Override
     public int compareTo(final Version other) {
         if (equals(other)) {
@@ -174,9 +318,9 @@ public final class Version implements Comparable<Version> {
                     if (this.special != null && other.special != null) {
                         return this.special.compareTo(other.special);
                     } else if (other.special != null) {
-                        return -1;
+                        return 1;
                     } else if (this.special != null) {
-                       return 1;
+                       return -1;
                     } // else handled by previous equals check
                 }
             }
