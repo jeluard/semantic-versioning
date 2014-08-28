@@ -16,6 +16,9 @@
  */
 package org.semver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -53,6 +56,8 @@ public class VersionTest {
         Version.parse("1.2.3-RC-SNAPSHOT");
         Version.parse("1.2-RC-SNAPSHOT");
     }
+
+
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldInvalidVersion1NotBeParsed() {
@@ -103,6 +108,27 @@ public class VersionTest {
         Assert.assertTrue(Version.parse("1.0.0Beta").compareTo(Version.parse("1.0.0Alpha")) > 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.0")) > 0);
         Assert.assertFalse(Version.parse("0.0.0").compareTo(Version.parse("0.0.1")) > 0);
+        // based on http://semver.org/
+        //  Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.
+        String[] versions = { "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta", "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11", "1.0.0-rc.1", "1.0.0" };
+        assertTotalOrder(versions);
+    }
+
+    private void assertTotalOrder(String[] versions) {
+      List<String> problems = new ArrayList<String>();
+      for (int i = 0; i < versions.length - 1; i++) {
+        Version v1 = Version.parse(versions[i]);
+        for (int j = (i + 1); j < versions.length; j++) {
+          Version v2 = Version.parse(versions[j]);
+          int compare = v1.compareTo(v2);
+          if (compare >= 0 ) {
+            problems.add(v1 + ( compare == 0 ? " = " : " > ") + v2);
+          }
+        }
+      }
+      if (problems.size() > 0) {
+        Assert.fail("incorrect comparisons: " + problems);
+      }
     }
 
     @Test
@@ -117,6 +143,25 @@ public class VersionTest {
         Assert.assertEquals(version.next(Version.Element.PATCH), new Version(major, minor, patch+1));
     }
 
+    @Test
+    public void nextFromPre() {
+        final Version version1 = new Version(1, 0, 0, "-", "rc1");
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 0, 0), version1.next(Version.Element.PATCH));
+
+        final Version version2 = new Version(1, 1, 0, "-", "rc1");
+        Assert.assertEquals(new Version(2, 0, 0), version2.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 1, 0), version2.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 1, 0), version2.next(Version.Element.PATCH));
+
+        final Version version3 = new Version(1, 1, 1, "-", "rc1");
+        Assert.assertEquals(new Version(2, 0, 0), version3.next(Version.Element.MAJOR));
+        Assert.assertEquals(new Version(1, 2, 0), version3.next(Version.Element.MINOR));
+        Assert.assertEquals(new Version(1, 1, 1), version3.next(Version.Element.PATCH));
+    }
+
+
     @Test(expected=IllegalArgumentException.class)
     public void shouldNextWithNullComparisonTypeFail() {
         final int major = 1;
@@ -125,6 +170,6 @@ public class VersionTest {
         final Version version = new Version(major, minor, patch);
 
         version.next(null);
-    }  
-    
+    }
+
 }
