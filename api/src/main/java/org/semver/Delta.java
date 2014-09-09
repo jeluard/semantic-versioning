@@ -28,7 +28,7 @@ import org.osjava.jardiff.AbstractInfo;
  * Encapsulates differences between two sets of classes.
  * <br />
  * Provides convenient methods to validate that chosen {@link Version} are correct.
- * 
+ *
  */
 @Immutable
 public final class Delta {
@@ -37,9 +37,9 @@ public final class Delta {
      * Library compatibility type. From most compatible to less compatible.
      */
     public enum CompatibilityType {
-        
+
         BACKWARD_COMPATIBLE_IMPLEMENTER,
-        
+
         BACKWARD_COMPATIBLE_USER,
 
         NON_BACKWARD_COMPATIBLE
@@ -47,10 +47,10 @@ public final class Delta {
 
     @Immutable
     public static class Difference implements Comparable<Difference> {
-        
+
         private final String className;
         private final AbstractInfo info;
-        
+
         public Difference(@Nonnull final String className, @Nonnull final AbstractInfo info) {
             if (className == null) {
                 throw new IllegalArgumentException("null className");
@@ -58,7 +58,7 @@ public final class Delta {
             if (info == null) {
                 throw new IllegalArgumentException("null info");
             }
-            
+
             this.className = className;
             this.info = info;
         }
@@ -77,33 +77,33 @@ public final class Delta {
         public int compareTo(final Difference other) {
             return getClassName().compareTo(other.getClassName());
         }
-        
+
     }
 
     @Immutable
     public static class Add extends Difference {
-        
+
         public Add(@Nonnull final String className, @Nonnull final AbstractInfo info) {
             super(className, info);
         }
-        
+
     }
 
     @Immutable
     public static class Change extends Difference {
-        
+
         private final AbstractInfo modifiedInfo;
-        
+
         public Change(@Nonnull final String className, @Nonnull final AbstractInfo info, @Nonnull final AbstractInfo modifiedInfo) {
             super(className, info);
-            
+
             this.modifiedInfo = modifiedInfo;
         }
 
         public AbstractInfo getModifiedInfo() {
             return this.modifiedInfo;
         }
-        
+
     }
 
     @Immutable
@@ -126,15 +126,15 @@ public final class Delta {
 
     @Immutable
     public static class Remove extends Difference {
-        
+
         public Remove(@Nonnull final String className, @Nonnull final AbstractInfo info) {
             super(className, info);
         }
-        
+
     }
 
     private final Set<Difference> differences;
-    
+
     public Delta(@Nonnull final Set<? extends Difference> differences) {
         this.differences = Collections.unmodifiableSet(differences);
     }
@@ -154,7 +154,7 @@ public final class Delta {
         if (contains(this.differences, Change.class) ||
             contains(this.differences, Remove.class)) {
             return CompatibilityType.NON_BACKWARD_COMPATIBLE;
-        } else if (contains(this.differences, Add.class) || 
+        } else if (contains(this.differences, Add.class) ||
                 contains(this.differences, Deprecate.class)) {
             return CompatibilityType.BACKWARD_COMPATIBLE_USER;
         } else {
@@ -170,7 +170,7 @@ public final class Delta {
         }
         return false;
     }
-    
+
     /**
      *
      * Infers next {@link Version} depending on provided {@link CompatibilityType}.
@@ -187,7 +187,7 @@ public final class Delta {
         if (compatibilityType == null) {
             throw new IllegalArgumentException("null compatibilityType");
         }
-        
+
         switch (compatibilityType) {
             case BACKWARD_COMPATIBLE_IMPLEMENTER:
                 return version.next(Version.Element.PATCH);
@@ -198,8 +198,8 @@ public final class Delta {
             default:
                 throw new IllegalArgumentException("Unknown type <"+compatibilityType+">");
         }
-    }    
-    
+    }
+
     /**
      * @param previous
      * @return an inferred {@link Version} for current JAR based on previous JAR content/version.
@@ -213,7 +213,7 @@ public final class Delta {
         if (previous.isInDevelopment()) {
             throw new IllegalArgumentException("Cannot infer for in development version <"+previous+">");
         }
-        
+
         final CompatibilityType compatibilityType = computeCompatibilityType();
         return inferNextVersion(previous, compatibilityType);
     }
@@ -241,7 +241,8 @@ public final class Delta {
 
         //Current version must be superior or equals to inferred version
         final Version inferredVersion = infer(previous);
-        return current.compareTo(inferredVersion) >= 0;
+        // if the current version is a pre-release then the corresponding release need to be superior or equal
+        return current.toReleaseVersion().compareTo(inferredVersion) >= 0;
     }
-    
+
 }

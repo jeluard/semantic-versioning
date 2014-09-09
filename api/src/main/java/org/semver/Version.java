@@ -147,6 +147,15 @@ public final class Version implements Comparable<Version> {
         }
     }
 
+    /**
+     * if this is a pre-release version, returns the corresponding release
+     * return the same version if already a release
+     * @return a release version
+     */
+    public Version toReleaseVersion() {
+      return new Version(major, minor, patch);
+    }
+
     public boolean isInDevelopment() {
         return this.major == 0;
     }
