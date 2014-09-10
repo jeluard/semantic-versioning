@@ -16,10 +16,21 @@
  */
 package org.semver;
 
+import static java.util.Collections.singleton;
+import static org.junit.Assert.assertEquals;
+import static org.semver.Delta.inferNextVersion;
+import static org.semver.Delta.CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER;
+import static org.semver.Delta.CompatibilityType.BACKWARD_COMPATIBLE_USER;
+import static org.semver.Delta.CompatibilityType.NON_BACKWARD_COMPATIBLE;
+import static org.semver.Version.Element.MAJOR;
+import static org.semver.Version.Element.MINOR;
+import static org.semver.Version.Element.PATCH;
+
+import org.semver.Delta.Difference;
+
 import java.util.Collections;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.osjava.jardiff.ClassInfo;
 import org.osjava.jardiff.FieldInfo;
@@ -27,86 +38,86 @@ import org.osjava.jardiff.MethodInfo;
 
 public class DeltaTest {
 
-    private static final Set<Delta.Difference> EMPTY_DIFFERENCES = Collections.<Delta.Difference>emptySet();
-    
+    private static final Set<Difference> EMPTY_DIFFERENCES = Collections.<Difference>emptySet();
+
     @Test
     public void inferVersion() {
         final int major = 1;
         final int minor = 2;
         final int patch = 3;
         final Version version = new Version(major, minor, patch);
-        
-        Assert.assertEquals(version.next(Version.Element.MAJOR), Delta.inferNextVersion(version, Delta.CompatibilityType.NON_BACKWARD_COMPATIBLE));
-        Assert.assertEquals(version.next(Version.Element.MINOR), Delta.inferNextVersion(version, Delta.CompatibilityType.BACKWARD_COMPATIBLE_USER));
-        Assert.assertEquals(version.next(Version.Element.PATCH), Delta.inferNextVersion(version, Delta.CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER));
+
+        assertEquals(version.next(MAJOR), inferNextVersion(version, NON_BACKWARD_COMPATIBLE));
+        assertEquals(version.next(MINOR), inferNextVersion(version, BACKWARD_COMPATIBLE_USER));
+        assertEquals(version.next(PATCH), inferNextVersion(version, BACKWARD_COMPATIBLE_IMPLEMENTER));
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldInferWithNullVersionFail() {
-        Delta.inferNextVersion(null, Delta.CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER);
+        inferNextVersion(null, BACKWARD_COMPATIBLE_IMPLEMENTER);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldInferWithNullCompatibilityTypeFail() {
-        Delta.inferNextVersion(new Version(1, 0, 0), null);
+        inferNextVersion(new Version(1, 0, 0), null);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void shouldNullVersionNotBeInferable() {
         new Delta(EMPTY_DIFFERENCES).infer(null);
     }
-    
+
     @Test(expected=IllegalArgumentException.class)
     public void shouldDevelopmentVersionNotBeInferable() {
         new Delta(EMPTY_DIFFERENCES).infer(new Version(0, 0, 0));
     }
 
     @Test
-    public void shouldEmptyDeltaBeImplementerBackwareCompatible() {
+    public void shouldEmptyDeltaBeImplementerBackwardCompatible() {
         final int major = 1;
         final int minor = 2;
         final int patch = 3;
         final Version version = new Version(major, minor, patch);
 
         final Version inferedVersion = new Delta(EMPTY_DIFFERENCES).infer(version);
-        
-        Assert.assertEquals(new Version(major, minor, patch+1), inferedVersion);
+
+        assertEquals(new Version(major, minor, patch+1), inferedVersion);
     }
 
     @Test
-    public void shouldDeltaWithAddsBeUserBackwareCompatible() {
+    public void shouldDeltaWithAddsBeUserBackwardCompatible() {
         final int major = 1;
         final int minor = 2;
         final int patch = 3;
         final Version version = new Version(major, minor, patch);
 
         final Version inferedVersion = new Delta(Collections.singleton(new Delta.Add("class", new FieldInfo(0, "", "", "", null)))).infer(version);
-        
-        Assert.assertEquals(new Version(major, minor+1, 0), inferedVersion);
+
+        assertEquals(new Version(major, minor+1, 0), inferedVersion);
     }
 
     @Test
-    public void shouldDeltaWithChangesBeNonBackwareCompatible() {
+    public void shouldDeltaWithChangesBeNonBackwardCompatible() {
         final int major = 1;
         final int minor = 2;
         final int patch = 3;
         final Version version = new Version(major, minor, patch);
 
         final Version inferedVersion = new Delta(Collections.singleton(new Delta.Change("class", new FieldInfo(0, "", "", "", null), new FieldInfo(0, "", "", "", null)))).infer(version);
-        
-        Assert.assertEquals(new Version(major+1, 0, 0), inferedVersion);
+
+        assertEquals(new Version(major+1, 0, 0), inferedVersion);
     }
 
     @Test
-    public void shouldDeltaWithRemovesBeNonBackwareCompatible() {
+    public void shouldDeltaWithRemovesBeNonBackwardCompatible() {
         final int major = 1;
         final int minor = 2;
         final int patch = 3;
         final Version version = new Version(major, minor, patch);
 
         final Version inferedVersion = new Delta(Collections.singleton(new Delta.Remove("class", new FieldInfo(0, "", "", "", null)))).infer(version);
-        
-        Assert.assertEquals(new Version(major+1, 0, 0), inferedVersion);
+
+        assertEquals(new Version(major+1, 0, 0), inferedVersion);
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -121,7 +132,7 @@ public class DeltaTest {
 
     @Test
     public void shouldValidateWithCurrentVersionInDevelopmentSucceed() {
-        Assert.assertTrue(new Delta(EMPTY_DIFFERENCES).validate(new Version(0, 0, 0), new Version(0, 0, 1)));
+      validate(EMPTY_DIFFERENCES, new Version(0, 0, 0), new Version(0, 0, 1), true);
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -136,26 +147,38 @@ public class DeltaTest {
 
     @Test
     public void shouldValidateWithCorrectVersionsSucceed() {
-        Assert.assertTrue(new Delta(EMPTY_DIFFERENCES).validate(new Version(1, 1, 0), new Version(1, 1, 1)));
+      validate(EMPTY_DIFFERENCES, new Version(1, 1, 0), new Version(1, 1, 1), true);
+    }
+
+    @Test
+    public void shouldValidateWithCorrectPreVersionsSucceed() {
+      validate(EMPTY_DIFFERENCES, new Version(1, 1, 0, "-", "rc1"), new Version(1, 1, 0, "-", "rc2"), true);
     }
 
     @Test
     public void shouldValidateWithIncorrectVersionFail() {
-        Assert.assertFalse(new Delta(Collections.singleton(new Delta.Remove("class", new FieldInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 1, 1)));
+      validate(Collections.singleton(new Delta.Remove("class", new FieldInfo(0, "", "", "", null))), new Version(1, 1, 0), new Version(1, 1, 1), false);
     }
 
     @Test
     public void upgradeMinorVersionOnClassDeprecated() {
-        Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new ClassInfo(1, 0, "", "", "", null, null, null), new ClassInfo(1, 0, "", "", "", null, null, null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+      validate(singleton(new Delta.Deprecate("class", new ClassInfo(1, 0, "", "", "", null, null, null), new ClassInfo(1, 0, "", "", "", null, null, null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
     }
 
     @Test
     public void upgradeMinorVersionOnFieldDeprecated() {
-	Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new FieldInfo(0, "", "", "", null), new FieldInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+      validate(singleton(new Delta.Deprecate("class", new FieldInfo(0, "", "", "", null), new FieldInfo(0, "", "", "", null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
     }
 
     @Test
     public void upgradeMinorVersionOnMethodDeprecated() {
-	Assert.assertTrue(new Delta(Collections.singleton(new Delta.Deprecate("class", new MethodInfo(0, "", "", "", null), new MethodInfo(0, "", "", "", null)))).validate(new Version(1, 1, 0), new Version(1, 2, 0)));
+      validate(singleton(new Delta.Deprecate("class", new MethodInfo(0, "", "", "", null), new MethodInfo(0, "", "", "", null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
+    }
+
+    private void validate(Set<? extends Delta.Difference> differences, Version previous, Version current, boolean valid) {
+      assertEquals(
+          "accept differences " + differences + " when changing version from " + previous + " to " + current,
+          valid,
+          new Delta(differences).validate(previous, current));
     }
 }
