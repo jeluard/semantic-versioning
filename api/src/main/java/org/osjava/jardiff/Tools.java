@@ -66,12 +66,14 @@ public final class Tools
      * @return
      */
     public static boolean isAccessChange(int oldAccess, int newAccess) {
-        if ((oldAccess & Opcodes.ACC_FINAL) == 0 && (newAccess & Opcodes.ACC_FINAL) > 0) {
-            return true;
-        } else {
-            oldAccess = oldAccess & ~Opcodes.ACC_FINAL;
-            newAccess = newAccess & ~Opcodes.ACC_FINAL;
-        }
-        return oldAccess != newAccess;
-    }
+		if ((oldAccess & Opcodes.ACC_FINAL) == 0 && (newAccess & Opcodes.ACC_FINAL) > 0) {
+			return true;
+		} else if ((oldAccess & Opcodes.ACC_ABSTRACT) == 0 && (newAccess & Opcodes.ACC_ABSTRACT) > 0) {
+			return true;
+		} else {
+			oldAccess = oldAccess & ~Opcodes.ACC_FINAL & ~Opcodes.ACC_ABSTRACT;
+			newAccess = newAccess & ~Opcodes.ACC_FINAL & ~Opcodes.ACC_ABSTRACT;
+		}
+		return oldAccess != newAccess;
+	}
 }
