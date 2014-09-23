@@ -38,7 +38,7 @@ public class PublicDiffCriteria implements DiffCriteria
     public boolean validClass(ClassInfo info) {
         return !info.isSynthetic() && info.isPublic();
     }
-    
+
     /**
      * Check if a method is valid.
      * If the method is not synthetic and public, return true.
@@ -49,7 +49,7 @@ public class PublicDiffCriteria implements DiffCriteria
     public boolean validMethod(MethodInfo info) {
         return !info.isSynthetic() && info.isPublic();
     }
-    
+
     /**
      * Check if a field is valid.
      * If the method is not synthetic and public, return true.
@@ -60,7 +60,7 @@ public class PublicDiffCriteria implements DiffCriteria
     public boolean validField(FieldInfo info) {
         return !info.isSynthetic() && info.isPublic();
     }
-    
+
     /**
      * Check if there is a change between two versions of a class.
      * Returns true if the access flags differ, or if the superclass differs
@@ -71,7 +71,7 @@ public class PublicDiffCriteria implements DiffCriteria
      * @return True if the classes differ, false otherwise.
      */
     public boolean differs(ClassInfo oldInfo, ClassInfo newInfo) {
-        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
+        if (Tools.isClassAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         // Yes classes can have a null supername, e.g. java.lang.Object !
         if(oldInfo.getSupername() == null) {
@@ -81,15 +81,15 @@ public class PublicDiffCriteria implements DiffCriteria
         } else if (!oldInfo.getSupername().equals(newInfo.getSupername())) {
             return true;
         }
-        Set<String> oldInterfaces
+        final Set<String> oldInterfaces
             = new HashSet(Arrays.asList(oldInfo.getInterfaces()));
-        Set<String> newInterfaces
+        final Set<String> newInterfaces
             = new HashSet(Arrays.asList(newInfo.getInterfaces()));
         if (!oldInterfaces.equals(newInterfaces))
             return true;
         return false;
     }
-    
+
     /**
      * Check if there is a change between two versions of a method.
      * Returns true if the access flags differ, or if the thrown
@@ -100,23 +100,23 @@ public class PublicDiffCriteria implements DiffCriteria
      * @return True if the methods differ, false otherwise.
      */
     public boolean differs(MethodInfo oldInfo, MethodInfo newInfo) {
-        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
+        if (Tools.isMethodAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         if (oldInfo.getExceptions() == null
             || newInfo.getExceptions() == null) {
             if (oldInfo.getExceptions() != newInfo.getExceptions())
                 return true;
         } else {
-            Set<String> oldExceptions
+            final Set<String> oldExceptions
                 = new HashSet(Arrays.asList(oldInfo.getExceptions()));
-            Set<String> newExceptions
+            final Set<String> newExceptions
                 = new HashSet(Arrays.asList(newInfo.getExceptions()));
             if (!oldExceptions.equals(newExceptions))
                 return true;
         }
         return false;
     }
-    
+
     /**
      * Check if there is a change between two versions of a field.
      * Returns true if the access flags differ, or if the inital value
@@ -127,7 +127,7 @@ public class PublicDiffCriteria implements DiffCriteria
      * @return True if the fields differ, false otherwise.
      */
     public boolean differs(FieldInfo oldInfo, FieldInfo newInfo) {
-        if (Tools.isAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
+        if (Tools.isFieldAccessChange(oldInfo.getAccess(), newInfo.getAccess()))
             return true;
         if (oldInfo.getValue() == null || newInfo.getValue() == null) {
             if (oldInfo.getValue() != newInfo.getValue())
