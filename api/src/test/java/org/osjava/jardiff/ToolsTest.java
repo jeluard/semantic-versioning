@@ -22,26 +22,116 @@ import static org.junit.Assert.*;
 
 public class ToolsTest {
 
+    static class lala {
+        int lala;
+    }
+
 	@Test
-	public void isAccessChange() {
-		// A class or method or field can't become final.
-		assertTrue(Tools.isAccessChange(0, Opcodes.ACC_FINAL));
-		assertTrue(Tools.isAccessChange(0, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
+	public void isClassAccessChange() {
+		// A class can't become final.
+		assertTrue(Tools.isClassAccessChange(0, Opcodes.ACC_FINAL));
+		assertTrue(Tools.isClassAccessChange(0, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
 		// ... but can become non-final.
-		assertFalse(Tools.isAccessChange(Opcodes.ACC_FINAL, 0));
-		assertFalse(Tools.isAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+		assertFalse(Tools.isClassAccessChange(Opcodes.ACC_FINAL, 0));
+		assertFalse(Tools.isClassAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+
 		// No matter the final access, can't become protected or private or
 		// package if it was public.
-		assertTrue(Tools.isAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
-		assertTrue(Tools.isAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
-		// A class or method can become concrete.
-		assertFalse(Tools.isAccessChange(Opcodes.ACC_ABSTRACT, 0));
-		assertFalse(Tools.isAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
-		assertFalse(Tools.isAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED));
+		assertTrue(Tools.isClassAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
+		assertTrue(Tools.isClassAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
+		// A class can become concrete.
+		assertFalse(Tools.isClassAccessChange(Opcodes.ACC_ABSTRACT, 0));
+		assertFalse(Tools.isClassAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+		assertFalse(Tools.isClassAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED));
 		// ...but can't become abstract
-		assertTrue(Tools.isAccessChange(0, Opcodes.ACC_ABSTRACT));
-		assertTrue(Tools.isAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC + Opcodes.ACC_ABSTRACT));
-		assertTrue(Tools.isAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED + Opcodes.ACC_ABSTRACT));
+		assertTrue(Tools.isClassAccessChange(0, Opcodes.ACC_ABSTRACT));
+		assertTrue(Tools.isClassAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC + Opcodes.ACC_ABSTRACT));
+		assertTrue(Tools.isClassAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED + Opcodes.ACC_ABSTRACT));
 	}
+
+    @Test
+    public void isFieldAccessChange() {
+        // A field can't become final.
+        assertTrue(Tools.isFieldAccessChange(0, Opcodes.ACC_FINAL));
+        assertTrue(Tools.isFieldAccessChange(0, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
+        // ... but can become non-final.
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_FINAL, 0));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+
+        // No matter the final access, can't become protected or private or
+        // package if it was public.
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
+
+        // A field can't change static
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_STATIC, 0));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+
+        // A field can't change volatile
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_VOLATILE, 0));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_VOLATILE + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+
+        // A field can change transient
+        assertFalse(Tools.isFieldAccessChange(0,
+                                              Opcodes.ACC_TRANSIENT));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PUBLIC,
+                                              Opcodes.ACC_PUBLIC + Opcodes.ACC_TRANSIENT));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_TRANSIENT,
+                                              0));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PUBLIC + Opcodes.ACC_TRANSIENT,
+                                              Opcodes.ACC_PUBLIC));
+    }
+
+    @Test
+    public void isMethodAccessChange() {
+        // A non-static method can't become final.
+        assertTrue(Tools.isMethodAccessChange(0, Opcodes.ACC_FINAL));
+        assertTrue(Tools.isMethodAccessChange(0, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
+        // ... but can become non-final.
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_FINAL, 0));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+        // ... but a static method can become final!
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_STATIC,
+                                               Opcodes.ACC_STATIC + Opcodes.ACC_FINAL));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC,
+                                               Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
+
+        // No matter the final access, can't become protected or private or
+        // package if it was public.
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
+        // A class or method can become concrete.
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_ABSTRACT, 0));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED));
+        // ...but can't become abstract
+        assertTrue(Tools.isMethodAccessChange(0, Opcodes.ACC_ABSTRACT));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC + Opcodes.ACC_ABSTRACT));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PROTECTED + Opcodes.ACC_ABSTRACT));
+
+        // A method can't change static
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_STATIC, 0));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
+
+        // A method can change synchronized
+        assertFalse(Tools.isMethodAccessChange(0,
+                                               Opcodes.ACC_SYNCHRONIZED));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC,
+                                               Opcodes.ACC_PUBLIC + Opcodes.ACC_SYNCHRONIZED));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_SYNCHRONIZED,
+                                               0));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC + Opcodes.ACC_SYNCHRONIZED,
+                                               Opcodes.ACC_PUBLIC));
+
+        // A method can change native
+        assertFalse(Tools.isMethodAccessChange(0,
+                                               Opcodes.ACC_NATIVE));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC,
+                                               Opcodes.ACC_PUBLIC + Opcodes.ACC_NATIVE));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_NATIVE,
+                                               0));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC + Opcodes.ACC_NATIVE,
+                                               Opcodes.ACC_PUBLIC));
+    }
 
 }
