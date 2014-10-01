@@ -46,7 +46,7 @@ public final class Version implements Comparable<Version> {
 
     private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
 
-    private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
+    private static final String SNAPSHOT_VERSION_SUFFIX = "SNAPSHOT";
 
     private final int major;
     private final int minor;

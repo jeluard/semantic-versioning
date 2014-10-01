@@ -97,6 +97,11 @@ public class VersionTest {
     }
 
     @Test
+    public void shouldBeSnapshotVersion() {
+        Assert.assertTrue(Version.parse("1.5.30-SNAPSHOT").isSnapshot());
+    }
+
+    @Test
     public void isNewer() {
     	  Assert.assertTrue(Version.parse("3.2.3").compareTo(Version.parse("3.2-M1-SNAPSHOT")) > 0);
         Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("0.0.0")) > 0);
