@@ -168,6 +168,14 @@ public final class Version implements Comparable<Version> {
         return this.special != null && this.special.isSnapshot();
     }
 
+    /**
+     * @param version version to check with
+     * @return {@code true}, if supplied version is compatible with this version, {@code false} - otherwise
+     */
+    public boolean isCompatible(Version version) {
+        return version != null && this.major == version.major;
+    }
+
     @Override
     public int hashCode() {
         int hash = 5;

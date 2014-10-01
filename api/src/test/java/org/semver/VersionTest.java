@@ -102,6 +102,20 @@ public class VersionTest {
     }
 
     @Test
+    public void shouldBeCompatible() {
+        Assert.assertTrue(Version.parse("1.0.0").isCompatible(Version.parse("1.2.3-SNAPSHOT")));
+        Assert.assertTrue(Version.parse("1.0.0").isCompatible(Version.parse("1.0.1")));
+        Assert.assertTrue(Version.parse("1.0.0").isCompatible(Version.parse("1.1.0")));
+    }
+
+    @Test
+    public void shouldBeIncompatible() {
+        Assert.assertFalse(Version.parse("0.0.1-SNAPSHOT").isCompatible(null));
+        Assert.assertFalse(Version.parse("1.0.1").isCompatible(Version.parse("2.0.0")));
+        Assert.assertFalse(Version.parse("1.1.0-rc3").isCompatible(Version.parse("3.1.0-SNAPSHOT")));
+    }
+
+    @Test
     public void isNewer() {
     	  Assert.assertTrue(Version.parse("3.2.3").compareTo(Version.parse("3.2-M1-SNAPSHOT")) > 0);
         Assert.assertTrue(Version.parse("1.0.0").compareTo(Version.parse("0.0.0")) > 0);
