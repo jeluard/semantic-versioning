@@ -99,53 +99,39 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
     
     @Override
     public void execute(final EnforcerRuleHelper helper) throws EnforcerRuleException {
-        final MavenProject project;
-        try {
-            project = (MavenProject) helper.evaluate("${project}");
-        } catch (ExpressionEvaluationException e) {
-            throw new EnforcerRuleException("Failed to access ${project} variable", e);
-        }
-        final String type = project.getArtifact().getType();
-        if (!AbstractEnforcerRule.JAR_ARTIFACT_TYPE.equals(type) &&
-            !AbstractEnforcerRule.BUNDLE_ARTIFACT_TYPE.equals(type)) {
+        final MavenProject project = getMavenProject(helper);
+        if (shouldSkipRuleExecution(project)) {
             helper.getLog().debug("Skipping non "+AbstractEnforcerRule.JAR_ARTIFACT_TYPE+
               " or " + BUNDLE_ARTIFACT_TYPE + " artifact.");
             return;
         }
 
         final Artifact previousArtifact;
-        final Artifact currentArtifact = project.getArtifact();
-        validateArtifact(currentArtifact);
+        final Artifact currentArtifact = validateArtifact(project.getArtifact());
         final Version current = Version.parse(currentArtifact.getVersion());
-        final File currentJar = currentArtifact.getFile();
         try {
             final ArtifactRepository localRepository = (ArtifactRepository) helper.evaluate("${localRepository}");
             final String version;
+
             if (this.previousVersion != null) {
                 version = this.previousVersion;
-
                 helper.getLog().info("Version specified as <"+version+">");
             } else {                
                 final ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) helper.getComponent(ArtifactMetadataSource.class);
                 final List<ArtifactVersion> availableVersions = getAvailableReleasedVersions(artifactMetadataSource, project, localRepository);
                 final List<ArtifactVersion> availablePreviousVersions = filterNonPreviousVersions(availableVersions, current);
-                
                 if (availablePreviousVersions.isEmpty()) {
                     helper.getLog().warn("No previously released version. Backward compatibility check not performed.");
-                    
                     return;
                 }
-
                 version = availablePreviousVersions.iterator().next().toString();
-                
                 helper.getLog().info("Version deduced as <"+version+"> (among all availables: "+availablePreviousVersions+")");
             }
             
             final ArtifactFactory artifactFactory = (ArtifactFactory) helper.getComponent(ArtifactFactory.class);
-            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), version, null, type);
+            previousArtifact = artifactFactory.createArtifact(project.getGroupId(), project.getArtifactId(), version, null, project.getArtifact().getType());
             final ArtifactResolver resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class );
             resolver.resolve(previousArtifact, project.getRemoteArtifactRepositories(), localRepository);
-
             validateArtifact(previousArtifact);
         } catch (Exception e) {
             helper.getLog().warn("Exception while accessing artifacts; skipping check.", e);
@@ -154,36 +140,25 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
 
         final Version previous = Version.parse(previousArtifact.getVersion());
         final File previousJar = previousArtifact.getFile();
-
-        helper.getLog().info("Using <"+previousJar+"> as previous JAR");
-        helper.getLog().info("Using <"+currentJar+"> as current JAR");
-        
-        try {
-            final DiffCriteria diffCriteria = publicOnly ? new PublicDiffCriteria() : new SimpleDiffCriteria();
-            final Comparer comparer = new Comparer(diffCriteria, previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
-            final Delta delta = comparer.diff();
-
-            enforce(helper, delta, previous, current);
-        } catch (IOException e) {
-            throw new EnforcerRuleException("Exception while checking compatibility: "+e.toString(), e);
-        }
+        final File currentJar = currentArtifact.getFile();
+        compareJars(helper, previous, previousJar, current, currentJar);
     }
 
     protected abstract void enforce(final EnforcerRuleHelper helper, final Delta delta, final Version previous, final Version current) throws EnforcerRuleException;
-    
+
     protected final void fail(final Delta delta, final String message) throws EnforcerRuleException {
         if (this.dumpDetails) {
             Dumper.dump(delta);
         }
         throw new EnforcerRuleException(message);
     }
-    
+
     /**
      * @param artifactMetadataSource
      * @param project
      * @param localRepository
      * @return all available versions from most recent to oldest
-     * @throws ArtifactMetadataRetrievalException 
+     * @throws ArtifactMetadataRetrievalException
      */
     protected final List<ArtifactVersion> getAvailableReleasedVersions(final ArtifactMetadataSource artifactMetadataSource, final MavenProject project, final ArtifactRepository localRepository) throws ArtifactMetadataRetrievalException {
         final List<ArtifactVersion> availableVersions = artifactMetadataSource.retrieveAvailableVersions(project.getArtifact(), localRepository, project.getRemoteArtifactRepositories());
@@ -210,14 +185,45 @@ public abstract class AbstractEnforcerRule implements EnforcerRule {
         return versions;
     }
 
+    private static MavenProject getMavenProject(EnforcerRuleHelper helper) throws EnforcerRuleException {
+        final MavenProject project;
+        try {
+            project = (MavenProject) helper.evaluate("${project}");
+        } catch (ExpressionEvaluationException e) {
+            throw new EnforcerRuleException("Failed to access ${project} variable", e);
+        }
+        return project;
+    }
+
+    private static boolean shouldSkipRuleExecution(MavenProject project) {
+        return !AbstractEnforcerRule.JAR_ARTIFACT_TYPE.equals(project.getArtifact().getType()) &&
+                !AbstractEnforcerRule.BUNDLE_ARTIFACT_TYPE.equals(project.getArtifact().getType());
+    }
+
+    private void compareJars(final EnforcerRuleHelper helper, final Version previous, final File previousJar, final Version current,
+            final File currentJar) throws EnforcerRuleException {
+        helper.getLog().info("Using <" + previousJar + "> as previous JAR");
+        helper.getLog().info("Using <" + currentJar + "> as current JAR");
+        try {
+            final DiffCriteria diffCriteria = publicOnly ? new PublicDiffCriteria() : new SimpleDiffCriteria();
+            final Comparer comparer =
+                    new Comparer(diffCriteria, previousJar, currentJar, extractFilters(this.includes), extractFilters(this.excludes));
+            final Delta delta = comparer.diff();
+            enforce(helper, delta, previous, current);
+        } catch (IOException e) {
+            throw new EnforcerRuleException("Exception while checking compatibility: " + e.toString(), e);
+        }
+    }
+
     /**
      * Validates that specified {@link Artifact} is a file.
      * @param artifact
      */
-    private void validateArtifact(final Artifact artifact) {
+    private static Artifact validateArtifact(final Artifact artifact) {
         if (!artifact.getFile().isFile()) {
             throw new IllegalArgumentException("<"+artifact.getFile()+"> is not a file");
         }
+        return artifact;
     }
 
     @Override
