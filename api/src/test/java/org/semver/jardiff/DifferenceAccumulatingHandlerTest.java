@@ -300,4 +300,30 @@ public class DifferenceAccumulatingHandlerTest {
         Assert.assertEquals( "Class should not be considered: ", false, new DifferenceAccumulatingHandler(
                 inclusionSet, exclusionSet ).isClassConsidered( "de/test/java/regex/Impl" ) );
     }
+    
+    @Test
+    public void shouldClassNotBeConsideredWhenNotMatchingAnyDefinedInclude() {
+
+        List<String> inclusions = new ArrayList<String>();
+        inclusions.add( "test/java/regex/code/*" );
+        Set<String> inclusionSet = new HashSet<String>( inclusions );
+        List<String> exclusions = new ArrayList<String>();
+        Set<String> exclusionSet = new HashSet<String>( exclusions );
+
+        Assert.assertEquals( "Class should not be considered: ", false, new DifferenceAccumulatingHandler(
+                inclusionSet, exclusionSet ).isClassConsidered( "de/test/java/regex/Impl" ) );
+    }
+
+    @Test
+    public void shouldClassBeConsideredWhenMatchingDefinedInclude() {
+
+        List<String> inclusions = new ArrayList<String>();
+        inclusions.add( "test/java/regex/code/*" );
+        Set<String> inclusionSet = new HashSet<String>( inclusions );
+        List<String> exclusions = new ArrayList<String>();
+        Set<String> exclusionSet = new HashSet<String>( exclusions );
+
+        Assert.assertEquals( "Class should be considered: ", true, new DifferenceAccumulatingHandler(
+                inclusionSet, exclusionSet ).isClassConsidered( "de/test/java/regex/code/Impl" ) );
+    }
 }
