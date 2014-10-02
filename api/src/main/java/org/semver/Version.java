@@ -46,7 +46,7 @@ public final class Version implements Comparable<Version> {
 
     private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
 
-    private static final String SNAPSHOT_VERSION_SUFFIX = "-SNAPSHOT";
+    private static final String SNAPSHOT_VERSION_SUFFIX = "SNAPSHOT";
 
     private final int major;
     private final int minor;
@@ -166,6 +166,14 @@ public final class Version implements Comparable<Version> {
 
     public boolean isSnapshot() {
         return this.special != null && this.special.isSnapshot();
+    }
+
+    /**
+     * @param version version to check with
+     * @return {@code true}, if supplied version is compatible with this version, {@code false} - otherwise
+     */
+    public boolean isCompatible(Version version) {
+        return version != null && this.major == version.major;
     }
 
     @Override
