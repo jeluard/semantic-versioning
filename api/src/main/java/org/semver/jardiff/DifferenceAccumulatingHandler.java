@@ -286,9 +286,10 @@ public final class DifferenceAccumulatingHandler extends AbstractDiffHandler {
                  final Matcher includeMatcher = includePattern.matcher( fixedClassName );
 
                  while ( includeMatcher.find() ) {
-                     return false;
+                     return true;
                  }
               }
+              return false;
           }
           return true;
       }
