@@ -65,6 +65,18 @@ public final class Tools
         return (value & mask) == 0;
     }
 
+    private static boolean isLessAccessPermitted(int oldAccess, int newAccess) {
+        if (has(newAccess, Opcodes.ACC_PUBLIC)) {
+            return false;
+        } else if (has(newAccess, Opcodes.ACC_PROTECTED)) {
+            return has(oldAccess, Opcodes.ACC_PUBLIC);
+        } else if (has(newAccess, Opcodes.ACC_PRIVATE)) {
+            return not(oldAccess, Opcodes.ACC_PRIVATE);
+        } else {
+            return has(oldAccess, Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED);
+        }
+    }
+
     /**
      * @deprecated Use {@link #isClassAccessChange(int, int)}.
      */
@@ -118,6 +130,14 @@ public final class Tools
      * Returns whether a field's newAccess is incompatible with oldAccess
      * following <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html">Java Language Specification, Java SE 7 Edition</a>:
      * <ul>
+     *   <li><a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html#jls-13.4.9">13.4.7 Access to Members and Constructors</a><ul>
+     *     <li>Changing the declared access of a member or constructor to permit less access
+     *        <b>may break compatibility</b> with pre-existing binaries, causing a linkage error to be thrown when these binaries are resolved.
+     *     </li>
+     *     <li>The binary format is defined so that changing a member or constructor to be more accessible does not cause a
+     *         linkage error when a subclass (already) defines a method to have less access.
+     *     </li>
+     *     </ul></li>
      *   <li><a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html#jls-13.4.9">13.4.9 final Fields and Constants</a><ul>
      *     <li>If a field that was not declared final is changed to be declared final,
      *         then it <b>can break compatibility</b> with pre-existing binaries that attempt to assign new values to the field.</li>
@@ -155,13 +175,19 @@ public final class Tools
      * @return
      */
     public static boolean isFieldAccessChange(final int oldAccess, final int newAccess) {
+        if (isLessAccessPermitted(oldAccess, newAccess)) {
+            return true; // 13.4.7
+        }
         if ( not(oldAccess, Opcodes.ACC_FINAL) && has(newAccess, Opcodes.ACC_FINAL) ) {
             return true; // 13.4.9 #1
         } else {
             final int compatibleChanges = Opcodes.ACC_FINAL |         // 13.4.9 #2
                                           Opcodes.ACC_TRANSIENT;      // 13.4.11 #1
-            final int oldAccess2 = oldAccess & ~compatibleChanges;
-            final int newAccess2 = newAccess & ~compatibleChanges;
+            final int accessPermissions = Opcodes.ACC_PUBLIC |
+                                          Opcodes.ACC_PROTECTED |
+                                          Opcodes.ACC_PRIVATE;
+            final int oldAccess2 = oldAccess & ~compatibleChanges & ~accessPermissions;
+            final int newAccess2 = newAccess & ~compatibleChanges & ~accessPermissions;
             return oldAccess2 != newAccess2;
         }
     }
@@ -170,6 +196,14 @@ public final class Tools
      * Returns whether a method's newAccess is incompatible with oldAccess
      * following <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html">Java Language Specification, Java SE 7 Edition</a>:
      * <ul>
+     *   <li><a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html#jls-13.4.9">13.4.7 Access to Members and Constructors</a><ul>
+     *     <li>Changing the declared access of a member or constructor to permit less access
+     *        <b>may break compatibility</b> with pre-existing binaries, causing a linkage error to be thrown when these binaries are resolved.
+     *     </li>
+     *     <li>The binary format is defined so that changing a member or constructor to be more accessible does not cause a
+     *         linkage error when a subclass (already) defines a method to have less access.
+     *     </li>
+     *     </ul></li>
      *   <li><a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html#jls-13.4.16">13.4.16 abstract Methods</a><ul>
      *     <li>Changing a method that is declared abstract to no longer be declared abstract
      *         <b>does not break compatibility</b> with pre-existing binaries.</li>
@@ -210,6 +244,9 @@ public final class Tools
      * @return
      */
     public static boolean isMethodAccessChange(final int oldAccess, final int newAccess) {
+        if (isLessAccessPermitted(oldAccess, newAccess)) {
+            return true; // 13.4.7
+        }
         if ( not(oldAccess, Opcodes.ACC_ABSTRACT) && has(newAccess, Opcodes.ACC_ABSTRACT) ) {
             return true; // 13.4.16 #2
         } else  if ( not(oldAccess, Opcodes.ACC_FINAL) && not(oldAccess, Opcodes.ACC_STATIC) &&
@@ -220,8 +257,11 @@ public final class Tools
 		                                  Opcodes.ACC_FINAL |        // 13.4.17 #1
 		                                  Opcodes.ACC_NATIVE |       // 13.4.18 #1
 		                                  Opcodes.ACC_SYNCHRONIZED;  // 13.4.20 #1
-			final int oldAccess2 = oldAccess & ~compatibleChanges;
-			final int newAccess2 = newAccess & ~compatibleChanges;
+            final int accessPermissions = Opcodes.ACC_PUBLIC |
+                                          Opcodes.ACC_PROTECTED |
+                                          Opcodes.ACC_PRIVATE;
+			final int oldAccess2 = oldAccess & ~compatibleChanges & ~accessPermissions;
+			final int newAccess2 = newAccess & ~compatibleChanges & ~accessPermissions;
 			return oldAccess2 != newAccess2;
 		}
 	}
