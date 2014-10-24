@@ -392,7 +392,11 @@ public class JarDiff
                         addedFields.add(entry.getKey());
                 }
 
+                // We add all the old methods that match the criteria
                 changedMethods.addAll(removedMethods);
+                // We keep the intersection of these with all the new methods
+                // to detect as changed a method that no longer match the
+                // criteria (i.e. a method that was public and is now private)
                 changedMethods.retainAll(newMethods.keySet());
                 removedMethods.removeAll(changedMethods);
                 removedMethods.removeAll(extNewMethods.keySet());

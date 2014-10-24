@@ -65,7 +65,7 @@ public final class Tools
         return (value & mask) == 0;
     }
 
-    private static boolean isLessAccessPermitted(int oldAccess, int newAccess) {
+    private static boolean isAccessIncompatible(int oldAccess, int newAccess) {
         if (has(newAccess, Opcodes.ACC_PUBLIC)) {
             return false;
         } else if (has(newAccess, Opcodes.ACC_PROTECTED)) {
@@ -73,6 +73,7 @@ public final class Tools
         } else if (has(newAccess, Opcodes.ACC_PRIVATE)) {
             return not(oldAccess, Opcodes.ACC_PRIVATE);
         } else {
+            // new access is package, it is incompatible if old access was public or protected
             return has(oldAccess, Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED);
         }
     }
@@ -175,7 +176,7 @@ public final class Tools
      * @return
      */
     public static boolean isFieldAccessChange(final int oldAccess, final int newAccess) {
-        if (isLessAccessPermitted(oldAccess, newAccess)) {
+        if (isAccessIncompatible(oldAccess, newAccess)) {
             return true; // 13.4.7
         }
         if ( not(oldAccess, Opcodes.ACC_FINAL) && has(newAccess, Opcodes.ACC_FINAL) ) {
@@ -244,7 +245,7 @@ public final class Tools
      * @return
      */
     public static boolean isMethodAccessChange(final int oldAccess, final int newAccess) {
-        if (isLessAccessPermitted(oldAccess, newAccess)) {
+        if (isAccessIncompatible(oldAccess, newAccess)) {
             return true; // 13.4.7
         }
         if ( not(oldAccess, Opcodes.ACC_ABSTRACT) && has(newAccess, Opcodes.ACC_ABSTRACT) ) {
