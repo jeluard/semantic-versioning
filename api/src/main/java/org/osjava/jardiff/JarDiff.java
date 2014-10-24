@@ -393,12 +393,12 @@ public class JarDiff
                 }
 
                 changedMethods.addAll(removedMethods);
-                changedMethods.retainAll(addedMethods);
+                changedMethods.retainAll(newMethods.keySet());
                 removedMethods.removeAll(changedMethods);
                 removedMethods.removeAll(extNewMethods.keySet());
                 addedMethods.removeAll(changedMethods);
                 changedFields.addAll(removedFields);
-                changedFields.retainAll(addedFields);
+                changedFields.retainAll(newFields.keySet());
                 removedFields.removeAll(changedFields);
                 removedFields.removeAll(extNewFields.keySet());
                 addedFields.removeAll(changedFields);
