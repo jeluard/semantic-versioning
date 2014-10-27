@@ -58,10 +58,20 @@ public class ToolsTest {
         assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_FINAL, 0));
         assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
 
-        // No matter the final access, can't become protected or private or
-        // package if it was public.
+        // A field can become more accessible
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isFieldAccessChange(0, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isFieldAccessChange(0, Opcodes.ACC_PROTECTED));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PRIVATE, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PRIVATE, Opcodes.ACC_PROTECTED));
+        assertFalse(Tools.isFieldAccessChange(Opcodes.ACC_PRIVATE, 0));
+        // ...but can't become less accessible
         assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
         assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PRIVATE));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_PROTECTED, 0));
+        assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PRIVATE));
+        assertTrue(Tools.isFieldAccessChange(0, Opcodes.ACC_PRIVATE));
 
         // A field can't change static
         assertTrue(Tools.isFieldAccessChange(Opcodes.ACC_STATIC, 0));
@@ -96,10 +106,21 @@ public class ToolsTest {
         assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC,
                                                Opcodes.ACC_STATIC + Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL));
 
-        // No matter the final access, can't become protected or private or
-        // package if it was public.
+        // A method can become more accessible
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isMethodAccessChange(0, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isMethodAccessChange(0, Opcodes.ACC_PROTECTED));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PRIVATE, Opcodes.ACC_PUBLIC));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PRIVATE, Opcodes.ACC_PROTECTED));
+        assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_PRIVATE, 0));
+        // ...but can't become less accessible
         assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_FINAL + Opcodes.ACC_PUBLIC, 0));
         assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PROTECTED));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PUBLIC, Opcodes.ACC_PRIVATE));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PROTECTED, 0));
+        assertTrue(Tools.isMethodAccessChange(Opcodes.ACC_PROTECTED, Opcodes.ACC_PRIVATE));
+        assertTrue(Tools.isMethodAccessChange(0, Opcodes.ACC_PRIVATE));
+
         // A class or method can become concrete.
         assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_ABSTRACT, 0));
         assertFalse(Tools.isMethodAccessChange(Opcodes.ACC_ABSTRACT + Opcodes.ACC_PUBLIC, Opcodes.ACC_PUBLIC));
