@@ -4,7 +4,7 @@
 
   <groupId>org.semver</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.33</version>
+  <version>0.9.34-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Semantic Versioning</name>
@@ -29,7 +29,7 @@
     <connection>scm:git:git@github.com:jeluard/semantic-versioning</connection>
     <developerConnection>scm:git:git@github.com:jeluard/semantic-versioning</developerConnection>
     <url>scm:git:git@github.com:jeluard/semantic-versioning</url>
-    <tag>0.9.33</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
