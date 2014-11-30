@@ -20,11 +20,11 @@
       <version>2.0.0</version>
     </dependency>
     <dependency>
-      <groupId>asm</groupId>
+      <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
     </dependency>
     <dependency>
-      <groupId>asm</groupId>
+      <groupId>org.ow2.asm</groupId>
       <artifactId>asm-commons</artifactId>
     </dependency>
     <dependency>
@@ -48,14 +48,14 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>asm</groupId>
+        <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>3.2</version>
+        <version>5.0.3</version>
       </dependency>
       <dependency>
-        <groupId>asm</groupId>
+        <groupId>org.ow2.asm</groupId>
         <artifactId>asm-commons</artifactId>
-        <version>3.2</version>
+        <version>5.0.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

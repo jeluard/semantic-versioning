@@ -18,9 +18,10 @@ package org.osjava.jardiff;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A reusable class which uses the ASM to build up ClassInfo about a 
@@ -28,7 +29,7 @@ import org.objectweb.asm.commons.EmptyVisitor;
  *
  * @author <a href="mailto:antony@cyberiantiger.org">Antony Riley</a>
  */
-public class ClassInfoVisitor extends EmptyVisitor
+public class ClassInfoVisitor extends ClassVisitor
 {
     /**
      * The class file version.
@@ -71,6 +72,10 @@ public class ClassInfoVisitor extends EmptyVisitor
      */
     private Map<String, FieldInfo> fieldMap;
     
+    public ClassInfoVisitor() {
+        super(Opcodes.ASM5);
+    }
+    
     /**
      * Reset this ClassInfoVisitor so that it can be used to visit another
      * class.
@@ -107,7 +112,8 @@ public class ClassInfoVisitor extends EmptyVisitor
         this.supername = supername;
         this.interfaces = interfaces;
     }
-    
+
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc,
                                      String signature, String[] exceptions) {
         methodMap.put(name + desc, new MethodInfo(access, name, desc,
@@ -115,10 +121,11 @@ public class ClassInfoVisitor extends EmptyVisitor
         return null;
     }
     
+    @Override
     public FieldVisitor visitField(int access, String name, String desc,
                                    String signature, Object value) {
         fieldMap.put(name,
                      new FieldInfo(access, name, desc, signature, value));
-        return this;
+        return null;
     }
 }
