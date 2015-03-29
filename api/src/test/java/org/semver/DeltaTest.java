@@ -191,6 +191,13 @@ public class DeltaTest {
     }
 
     @Test
+    public void changedInterfaceOnClassIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface2" }, null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
+    }
+
+    @Test
     public void classVisibilityChangeIsIncompatible() {
         ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
         ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PRIVATE, "class", "class Foo", "super", new String[0], null, null);

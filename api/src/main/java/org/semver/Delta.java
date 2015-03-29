@@ -199,8 +199,8 @@ public final class Delta {
 
                     List<String> oldInterfaces = Arrays.asList(oldClassInfo.getInterfaces());
                     List<String> newInterfaces = Arrays.asList(newClassInfo.getInterfaces());
-
                     List<String> interfaceIntersection = new ArrayList<String>(newInterfaces);
+                    interfaceIntersection.retainAll(oldInterfaces);
 
                     if (interfaceIntersection.size() < oldInterfaces.size()) {
                         // Old set of interfaces is not a subset of the new set of interfaces.
