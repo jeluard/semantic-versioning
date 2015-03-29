@@ -18,6 +18,7 @@ package org.semver;
 
 import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
+import static org.objectweb.asm.Opcodes.*;
 import static org.semver.Delta.inferNextVersion;
 import static org.semver.Delta.CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER;
 import static org.semver.Delta.CompatibilityType.BACKWARD_COMPATIBLE_USER;
@@ -173,6 +174,34 @@ public class DeltaTest {
     @Test
     public void upgradeMinorVersionOnMethodDeprecated() {
       validate(singleton(new Delta.Deprecate("class", new MethodInfo(0, "", "", "", null), new MethodInfo(0, "", "", "", null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
+    }
+
+    @Test
+    public void addedInterfaceOnClassIsCompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1", "Interface2" }, null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), true);
+    }
+
+    @Test
+    public void removeInterfaceOnClassIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1", "Interface2" }, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
+    }
+
+    @Test
+    public void classVisibilityChangeIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PRIVATE, "class", "class Foo", "super", new String[0], null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
+    }
+
+    @Test
+    public void classSuperChangeIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "newsuper", new String[0], null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
     private void validate(Set<? extends Delta.Difference> differences, Version previous, Version current, boolean valid) {
