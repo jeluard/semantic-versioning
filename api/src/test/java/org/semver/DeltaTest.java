@@ -204,6 +204,13 @@ public class DeltaTest {
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
+    @Test
+    public void classByteChangeIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_7, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
+        validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
+    }
+
     private void validate(Set<? extends Delta.Difference> differences, Version previous, Version current, boolean valid) {
       assertEquals(
           "accept differences " + differences + " when changing version from " + previous + " to " + current,
