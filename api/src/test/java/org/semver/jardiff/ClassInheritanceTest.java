@@ -72,7 +72,7 @@ public class ClassInheritanceTest {
     ClassInfo a = oldClassInfoMap.get("org/semver/jardiff/ClassInheritanceTest$ClassA");
     ClassInfo b = newClassInfoMap.get("org/semver/jardiff/ClassInheritanceTest$ClassB");
     newClassInfoMap.put(a.getName(), new ClassInfo(b.getVersion(), b.getAccess(), a.getName(),
-            b.getSignature(), b.getSupername(), b.getInterfaces(),
+            b.getSignature(), "", b.getSupername(), "", b.getInterfaceSignatures(),
             b.getMethodMap(), b.getFieldMap()));
     newClassInfoMap.remove(b.getName());
     DifferenceAccumulatingHandler handler = new DifferenceAccumulatingHandler();

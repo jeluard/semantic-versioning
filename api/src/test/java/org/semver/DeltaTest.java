@@ -30,6 +30,7 @@ import static org.semver.Version.Element.PATCH;
 import org.semver.Delta.Difference;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.junit.Test;
@@ -163,7 +164,7 @@ public class DeltaTest {
 
     @Test
     public void upgradeMinorVersionOnClassDeprecated() {
-      validate(singleton(new Delta.Deprecate("class", new ClassInfo(1, 0, "", "", "", null, null, null), new ClassInfo(1, 0, "", "", "", null, null, null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
+      validate(singleton(new Delta.Deprecate("class", new ClassInfo(1, 0, "", "", "", "", "", null, null, null), new ClassInfo(1, 0, "", "", "", "", "", null, null, null))), new Version(1, 1, 0), new Version(1, 2, 0), true);
     }
 
     @Test
@@ -178,44 +179,75 @@ public class DeltaTest {
 
     @Test
     public void addedInterfaceOnClassIsCompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1", "Interface2" }, null, null);
+        HashMap<String, String> interfacesA = new HashMap<String, String>();
+        interfacesA.put("Interface1", "");
+        HashMap<String, String> interfacesB = new HashMap<String, String>();
+        interfacesB.put("Interface1", "");
+        interfacesB.put("Interface2", "");
+
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesA, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesB, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), true);
     }
 
     @Test
     public void removeInterfaceOnClassIsIncompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1", "Interface2" }, null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
+        HashMap<String, String> interfacesA = new HashMap<String, String>();
+        interfacesA.put("Interface1", "");
+        interfacesA.put("Interface2", "");
+        HashMap<String, String> interfacesB = new HashMap<String, String>();
+        interfacesB.put("Interface1", "");
+
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesA, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesB, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
     @Test
     public void changedInterfaceOnClassIsIncompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface1" }, null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[] { "Interface2" }, null, null);
+        HashMap<String, String> interfacesA = new HashMap<String, String>();
+        interfacesA.put("Interface1", "");
+        HashMap<String, String> interfacesB = new HashMap<String, String>();
+        interfacesB.put("Interface2", "");
+
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesA, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", interfacesB, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
     @Test
     public void classVisibilityChangeIsIncompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PRIVATE, "class", "class Foo", "super", new String[0], null, null);
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PRIVATE, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
     @Test
     public void classSuperChangeIsIncompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "newsuper", new String[0], null, null);
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "newsuper", "newsuper", Collections.EMPTY_MAP, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
     }
 
     @Test
     public void classByteChangeIsIncompatible() {
-        ClassInfo oldClassInfo = new ClassInfo(V1_7, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
-        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "super", new String[0], null, null);
+        ClassInfo oldClassInfo = new ClassInfo(V1_7, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
         validate(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), new Version(1, 1, 0), new Version(1, 2, 0), false);
+    }
+
+    @Test
+    public void testClassBecomesFinalIsUserCompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC | ACC_FINAL, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        validateCompatibility(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), BACKWARD_COMPATIBLE_USER);
+    }
+
+    @Test
+    public void testClassBecomesAbstractIsIncompatible() {
+        ClassInfo oldClassInfo = new ClassInfo(V1_8, ACC_PUBLIC, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        ClassInfo newClassInfo = new ClassInfo(V1_8, ACC_PUBLIC | ACC_ABSTRACT, "class", "class Foo", "", "super", "super", Collections.EMPTY_MAP, null, null);
+        validateCompatibility(singleton(new Delta.Change("class", oldClassInfo, newClassInfo)), NON_BACKWARD_COMPATIBLE);
     }
 
     private void validate(Set<? extends Delta.Difference> differences, Version previous, Version current, boolean valid) {
@@ -223,5 +255,9 @@ public class DeltaTest {
           "accept differences " + differences + " when changing version from " + previous + " to " + current,
           valid,
           new Delta(differences).validate(previous, current));
+    }
+
+    private void validateCompatibility(Set<? extends Delta.Difference> differences, Delta.CompatibilityType expectedCompatibility) {
+        assertEquals(expectedCompatibility, new Delta(differences).computeCompatibilityType());
     }
 }

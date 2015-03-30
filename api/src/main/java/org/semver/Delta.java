@@ -183,17 +183,20 @@ public final class Delta {
 
                 Change change = (Change)difference;
 
-                // If this is a class change, here's how we handle it:
-                //  * new superclass = backwards incompatible
-                //  * added interface = backwards compatible user (but not implementer)
-                //  * removed interface = backwards incompatible
-                //  * visibility reduced = backwards incompatible
-                //  * bytecode version increased = backwards incompatible
+                // We perform a myriad of checks for class changes.
                 if (change.getInfo() instanceof ClassInfo) {
                     ClassInfo oldClassInfo = (ClassInfo)change.getInfo();
                     ClassInfo newClassInfo = (ClassInfo)change.getModifiedInfo();
 
-                    if (!oldClassInfo.getSupername().equals(newClassInfo.getSupername())) {
+                    // If the superclass signature changed in any way, then we're not compatible.
+                    if (!oldClassInfo.getSuperClassSignature().equals(newClassInfo.getSuperClassSignature())) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If formal type params changed for the class, then we're not compatible.
+                    // Technically, we could be, if for example a type param was migrated to a more specialised type.
+                    // But we aren't that sophisticated (yet?)
+                    if (!oldClassInfo.getFormalTypeParams().equals(newClassInfo.getFormalTypeParams())) {
                         compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
                     }
 
@@ -219,6 +222,21 @@ public final class Delta {
                     // Bytecode version is higher in new version, that's not considered compatible.
                     if (newClassInfo.getVersion() > oldClassInfo.getVersion()) {
                         compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If class was not previously abstract, but now is, that is not backwards compatible.
+                    if (!oldClassInfo.isAbstract() && newClassInfo.isAbstract()) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If class was previously abstract, but now isn't, that is not implementer compatible.
+                    if (!oldClassInfo.isAbstract() && newClassInfo.isAbstract()) {
+                        compatibilityType = CompatibilityType.min(compatibilityType, CompatibilityType.BACKWARD_COMPATIBLE_USER);
+                    }
+
+                    // If class was not previously final, but now is, that is not implementer compatible.
+                    if (!oldClassInfo.isFinal() && newClassInfo.isFinal()) {
+                        compatibilityType = CompatibilityType.min(compatibilityType, CompatibilityType.BACKWARD_COMPATIBLE_USER);
                     }
                 } else {
                     // We don't special case field / method changes (for now)
