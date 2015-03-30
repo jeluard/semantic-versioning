@@ -1,3 +1,5 @@
+``This library is in dormant state. You might want to consider [japicmd](https://github.com/siom79/japicmp) instead``
+
 ![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
 
 Version number changes implications are not always clearly identified. Can I be sure this new minor version didn't break the public API? 
