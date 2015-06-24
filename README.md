@@ -1,4 +1,4 @@
-``This library is in dormant state. You might want to consider [japicmd](https://github.com/siom79/japicmp) instead``
+_This library is in dormant state and won't add any new feature. You might want to consider [japicmd](https://github.com/siom79/japicmp) instead._ 
 
 ![CI status](https://secure.travis-ci.org/jeluard/semantic-versioning.png)
 
