@@ -22,6 +22,9 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureVisitor;
+import org.objectweb.asm.signature.SignatureWriter;
 
 /**
  * A reusable class which uses the ASM to build up ClassInfo about a 
@@ -89,8 +92,13 @@ public class ClassInfoVisitor extends ClassVisitor
      * The the classInfo this ClassInfoVisitor has built up about a class
      */
     public ClassInfo getClassInfo() {
-        return new ClassInfo(version, access, name, signature, supername,
-                             interfaces, methodMap, fieldMap);
+        final ClassSignatureParser classSignatureParser = new ClassSignatureParser(signature);
+        final String formalTypeParams = classSignatureParser.getClassFormalTypeParams();
+        final String superSignature = classSignatureParser.getSuperClassSignature();
+        final Map<String, String> interfaceSignatures = classSignatureParser.getInterfaceSignatures();
+
+        return new ClassInfo(version, access, name, signature, formalTypeParams, supername, superSignature,
+                             interfaceSignatures, methodMap, fieldMap);
     }
     
     /**
@@ -127,5 +135,86 @@ public class ClassInfoVisitor extends ClassVisitor
         fieldMap.put(name,
                      new FieldInfo(access, name, desc, signature, value));
         return null;
+    }
+
+    /**
+     * Parses a full class signature and breaks it down into:
+     *  * declared formal type params
+     *  * superclass signature (including type params if applicable)
+     *  * interface list with corresponding type parameters (if they exist)
+     */
+    private static class ClassSignatureParser {
+        private SignatureWriter classSignature = new SignatureWriter();
+        private SignatureWriter superClassSignature = new SignatureWriter();
+        private Map<String, SignatureWriter> interfaceSignatures = new HashMap<String, SignatureWriter>();
+
+        public ClassSignatureParser(String signature) {
+            if (signature == null) {
+                return;
+            }
+
+            new SignatureReader(signature).accept(new SignatureVisitor(Opcodes.ASM5) {
+                @Override
+                public void visitFormalTypeParameter(final String name) {
+                    classSignature.visitFormalTypeParameter(name);
+                }
+
+                @Override
+                public SignatureVisitor visitClassBound() {
+                    return classSignature;
+                }
+
+                @Override
+                public SignatureVisitor visitInterfaceBound()
+                {
+                    return classSignature;
+                }
+
+                @Override
+                public SignatureVisitor visitSuperclass()
+                {
+                    return superClassSignature;
+                }
+
+                @Override
+                public SignatureVisitor visitInterface()
+                {
+                    return new SignatureWriter() {
+                        boolean visitedClassType = false;
+
+                        @Override
+                        public void visitClassType(final String name)
+                        {
+                            if (!visitedClassType) {
+                                visitedClassType = true;
+                                interfaceSignatures.put(name, this);
+                            } else {
+                                super.visitClassType(name);
+                            }
+                        }
+                    };
+                }
+            });
+        }
+
+        public String getClassFormalTypeParams() {
+            String signature = classSignature.toString();
+            if (signature.length() > 1) {
+                signature = signature.substring(1);
+            }
+            return signature;
+        }
+
+        public String getSuperClassSignature() {
+            return superClassSignature.toString();
+        }
+
+        public Map<String, String> getInterfaceSignatures() {
+            Map<String, String> interfaces = new HashMap<String, String>();
+            for (Map.Entry<String, SignatureWriter> entry : interfaceSignatures.entrySet()) {
+                interfaces.put(entry.getKey(), entry.getValue().toString());
+            }
+            return interfaces;
+        }
     }
 }

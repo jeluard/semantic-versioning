@@ -35,15 +35,23 @@ public final class ClassInfo extends AbstractInfo
     private final String signature;
 
     /**
+     * The formal type parameters
+     */
+    private final String formalTypeParams;
+
+    /**
      * The internal classname of the superclass.
      */
     private final String supername;
 
+    private final String superClassSignature;
+
     /**
-     * An array of names of internal classnames of interfaces implemented
+     * A map of names of internal classnames of interfaces implemented
      * by the class.
+     * Keyed by interface name, value is the type signature for the interface.
      */
-    private final String[] interfaces;
+    private final Map<String, String> interfaces;
 
     /**
      * A map of method signature to MethodInfo, for the methods provided
@@ -69,13 +77,15 @@ public final class ClassInfo extends AbstractInfo
      * @param methodMap a map of methods provided by this class.
      * @param fieldMap a map of fields provided by this class.
      */
-    public ClassInfo(int version, int access, String name, String signature,
-                     String supername, String[] interfaces, Map<String, MethodInfo> methodMap,
-                     Map<String, FieldInfo> fieldMap) {
+    public ClassInfo(int version, int access, String name, String signature, String formalTypeParams,
+                     String supername, String superSignature, Map<String, String> interfaces,
+                     Map<String, MethodInfo> methodMap, Map<String, FieldInfo> fieldMap) {
         super(access, name);
         this.version = version;
         this.signature = signature;
+        this.formalTypeParams = formalTypeParams;
         this.supername = supername;
+        this.superClassSignature = superSignature;
         this.interfaces = interfaces;
         this.methodMap = methodMap;
         this.fieldMap = fieldMap;
@@ -115,7 +125,7 @@ public final class ClassInfo extends AbstractInfo
      * @return an array of internal names of classes implemented by the class.
      */
     public final String[] getInterfaces() {
-        return interfaces;
+        return interfaces.keySet().toArray(new String[0]);
     }
 
     /**
@@ -134,5 +144,26 @@ public final class ClassInfo extends AbstractInfo
      */
     public final Map<String, FieldInfo> getFieldMap() {
         return fieldMap;
+    }
+
+    /**
+     * Get the full signature of the super class, including any type parameters.
+     */
+    public String getSuperClassSignature() {
+        return superClassSignature;
+    }
+
+    /**
+     * Get the formal type parameters declared for this class, if they exist.
+     */
+    public String getFormalTypeParams() {
+        return formalTypeParams;
+    }
+
+    /**
+     * Get the map of interfaces and their corresponding type signatures.
+     */
+    public final Map<String, String> getInterfaceSignatures() {
+        return interfaces;
     }
 }

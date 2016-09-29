@@ -520,8 +520,9 @@ public class JarDiff
     private static ClassInfo cloneDeprecated(ClassInfo classInfo) {
 	return new ClassInfo(classInfo.getVersion(), classInfo.getAccess()
 		| Opcodes.ACC_DEPRECATED, classInfo.getName(),
-		classInfo.getSignature(), classInfo.getSupername(),
-		classInfo.getInterfaces(), classInfo.getMethodMap(),
+		classInfo.getSignature(), classInfo.getFormalTypeParams(),
+        classInfo.getSupername(), classInfo.getSuperClassSignature(),
+		classInfo.getInterfaceSignatures(), classInfo.getMethodMap(),
 		classInfo.getFieldMap());
     }
 

@@ -16,12 +16,17 @@
  */
 package org.semver;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import org.osjava.jardiff.AbstractInfo;
+import org.osjava.jardiff.ClassInfo;
 
 /**
  *
@@ -42,7 +47,20 @@ public final class Delta {
 
         BACKWARD_COMPATIBLE_USER,
 
-        NON_BACKWARD_COMPATIBLE
+        NON_BACKWARD_COMPATIBLE;
+
+        /**
+         * Return the lesser of two compatibility types.
+         */
+        public static CompatibilityType min(CompatibilityType l, CompatibilityType r) {
+            if (l == NON_BACKWARD_COMPATIBLE || r == NON_BACKWARD_COMPATIBLE) {
+                return NON_BACKWARD_COMPATIBLE;
+            }
+            if (l == BACKWARD_COMPATIBLE_USER || r == BACKWARD_COMPATIBLE_USER) {
+                return BACKWARD_COMPATIBLE_USER;
+            }
+            return BACKWARD_COMPATIBLE_IMPLEMENTER;
+        }
     }
 
     @Immutable
@@ -151,9 +169,84 @@ public final class Delta {
     @Nonnull
     public final CompatibilityType computeCompatibilityType() {
 
-        if (contains(this.differences, Change.class) ||
-            contains(this.differences, Remove.class)) {
+        if (contains(this.differences, Remove.class)) {
             return CompatibilityType.NON_BACKWARD_COMPATIBLE;
+        } else if (contains(this.differences, Change.class)) {
+            // Innocent, until proven guilty.
+            CompatibilityType compatibilityType = CompatibilityType.BACKWARD_COMPATIBLE_IMPLEMENTER;
+
+            // Look at all Changes, see if any are backwards incompatible.
+            for (final Difference difference : this.differences) {
+                if (!(difference instanceof Change))  {
+                    continue;
+                }
+
+                Change change = (Change)difference;
+
+                // We perform a myriad of checks for class changes.
+                if (change.getInfo() instanceof ClassInfo) {
+                    ClassInfo oldClassInfo = (ClassInfo)change.getInfo();
+                    ClassInfo newClassInfo = (ClassInfo)change.getModifiedInfo();
+
+                    // If the superclass signature changed in any way, then we're not compatible.
+                    if (!oldClassInfo.getSuperClassSignature().equals(newClassInfo.getSuperClassSignature())) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If formal type params changed for the class, then we're not compatible.
+                    // Technically, we could be, if for example a type param was migrated to a more specialised type.
+                    // But we aren't that sophisticated (yet?)
+                    if (!oldClassInfo.getFormalTypeParams().equals(newClassInfo.getFormalTypeParams())) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    List<String> oldInterfaces = Arrays.asList(oldClassInfo.getInterfaces());
+                    List<String> newInterfaces = Arrays.asList(newClassInfo.getInterfaces());
+                    List<String> interfaceIntersection = new ArrayList<String>(newInterfaces);
+                    interfaceIntersection.retainAll(oldInterfaces);
+
+                    if (interfaceIntersection.size() < oldInterfaces.size()) {
+                        // Old set of interfaces is not a subset of the new set of interfaces.
+                        // This is backwards incompatible.
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    } else if (newInterfaces.size() > oldInterfaces.size()) {
+                        // New class has more interfaces than original, this is not implementer compatible.
+                        compatibilityType = CompatibilityType.min(compatibilityType, CompatibilityType.BACKWARD_COMPATIBLE_USER);
+                    }
+
+                    // Visibility reduced in new version, that's not compatible.
+                    if (oldClassInfo.isPublic() && !newClassInfo.isPublic()) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // Bytecode version is higher in new version, that's not considered compatible.
+                    if (newClassInfo.getVersion() > oldClassInfo.getVersion()) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If class was not previously abstract, but now is, that is not backwards compatible.
+                    if (!oldClassInfo.isAbstract() && newClassInfo.isAbstract()) {
+                        compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                    }
+
+                    // If class was previously abstract, but now isn't, that is not implementer compatible.
+                    if (!oldClassInfo.isAbstract() && newClassInfo.isAbstract()) {
+                        compatibilityType = CompatibilityType.min(compatibilityType, CompatibilityType.BACKWARD_COMPATIBLE_USER);
+                    }
+
+                    // If class was not previously final, but now is, that is not implementer compatible.
+                    if (!oldClassInfo.isFinal() && newClassInfo.isFinal()) {
+                        compatibilityType = CompatibilityType.min(compatibilityType, CompatibilityType.BACKWARD_COMPATIBLE_USER);
+                    }
+                } else {
+                    // We don't special case field / method changes (for now)
+                    // This means we may not be handling other special cases correctly, and reporting
+                    // non backwards compatible when we shouldn't be.
+                    compatibilityType = CompatibilityType.NON_BACKWARD_COMPATIBLE;
+                }
+            }
+
+            return compatibilityType;
         } else if (contains(this.differences, Add.class) ||
                 contains(this.differences, Deprecate.class)) {
             return CompatibilityType.BACKWARD_COMPATIBLE_USER;
